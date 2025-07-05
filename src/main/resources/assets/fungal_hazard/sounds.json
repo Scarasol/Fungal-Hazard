@@ -1,0 +1,181 @@
+{
+  "sporer_idle": {
+    "category": "hostile",
+    "subtitle": "subtitles.sporer_groans",
+    "sounds": [
+      {
+        "name": "fungal_hazard:sporer_idle1",
+        "stream": false
+      },
+      {
+        "name": "fungal_hazard:sporer_idle2",
+        "stream": false
+      }
+    ]
+  },
+  "sporer_death": {
+    "category": "hostile",
+    "subtitle": "subtitles.sporer_explosion",
+    "sounds": [
+      {
+        "name": "fungal_hazard:sporer_death",
+        "stream": false
+      }
+    ]
+  },
+  "sporer_death_in_creep": {
+    "category": "hostile",
+    "subtitle": "subtitles.sporer_explosion",
+    "sounds": [
+      {
+        "name": "fungal_hazard:sporer_death_in_creep",
+        "stream": false
+      }
+    ]
+  },
+  "volatile_idle": {
+    "category": "hostile",
+    "subtitle": "subtitles.volatile_groans",
+    "sounds": [
+      {
+        "name": "fungal_hazard:volatile_idle1",
+        "volume": 0.3,
+        "stream": false
+      },
+      {
+        "name": "fungal_hazard:volatile_idle2",
+        "volume": 0.3,
+        "stream": false
+      },
+      {
+        "name": "fungal_hazard:volatile_idle3",
+        "volume": 0.3,
+        "stream": false
+      },
+      {
+        "name": "fungal_hazard:volatile_idle4",
+        "volume": 0.3,
+        "stream": false
+      },
+      {
+        "name": "fungal_hazard:volatile_idle5",
+        "volume": 0.3,
+        "stream": false
+      },
+      {
+        "name": "fungal_hazard:volatile_idle6",
+        "volume": 0.3,
+        "stream": false
+      }
+    ]
+  },
+  "volatile_hurt_light": {
+    "category": "hostile",
+    "subtitle": "subtitles.volatile_hurt",
+    "sounds": [
+      {
+        "name": "fungal_hazard:volatile_hurt_light",
+        "volume": 0.3,
+        "stream": false
+      }
+    ]
+  },
+  "volatile_hurt_heavy": {
+    "category": "hostile",
+    "subtitle": "subtitles.volatile_hurt",
+    "sounds": [
+      {
+        "name": "fungal_hazard:volatile_hurt_heavy",
+        "volume": 0.3,
+        "stream": false
+      }
+    ]
+  },
+  "volatile_jump_attack": {
+    "category": "hostile",
+    "subtitle": "subtitles.volatile_roar",
+    "sounds": [
+      {
+        "name": "fungal_hazard:volatile_jump_attack",
+        "volume": 0.3,
+        "stream": false
+      }
+    ]
+  },
+  "volatile_execution": {
+    "category": "hostile",
+    "subtitle": "subtitles.volatile_roar",
+    "sounds": [
+      {
+        "name": "fungal_hazard:volatile_execution",
+        "volume": 0.3,
+        "stream": false
+      }
+    ]
+  },
+  "volatile_execution_failure": {
+    "category": "hostile",
+    "subtitle": "subtitles.volatile_hurt",
+    "sounds": [
+      {
+        "name": "fungal_hazard:volatile_execution_failure",
+        "volume": 0.3,
+        "stream": false
+      }
+    ]
+  },
+  "volatile_riding": {
+    "category": "hostile",
+    "subtitle": "subtitles.volatile_roar",
+    "sounds": [
+      {
+        "name": "fungal_hazard:volatile_riding",
+        "volume": 0.3,
+        "stream": false
+      }
+    ]
+  },
+  "volatile_death": {
+    "category": "hostile",
+    "subtitle": "subtitles.volatile_roar",
+    "sounds": [
+      {
+        "name": "fungal_hazard:volatile_death",
+        "volume": 0.3,
+        "stream": false
+      }
+    ]
+  },
+  "volatile_sprint": {
+    "category": "hostile",
+    "subtitle": "subtitles.volatile_roar",
+    "sounds": [
+      {
+        "name": "fungal_hazard:volatile_sprint1",
+        "volume": 0.3,
+        "stream": false
+      },
+      {
+        "name": "fungal_hazard:volatile_sprint2",
+        "volume": 0.3,
+        "stream": false
+      }
+    ]
+  },
+  "volatile_attack": {
+    "category": "hostile",
+    "subtitle": "subtitles.volatile_roar",
+    "sounds": [
+      {
+        "name": "fungal_hazard:volatile_attack1",
+        "volume": 0.3,
+        "stream": false
+      },
+      {
+        "name": "fungal_hazard:volatile_attack2",
+        "volume": 0.3,
+        "stream": false
+      }
+    ]
+  }
+}

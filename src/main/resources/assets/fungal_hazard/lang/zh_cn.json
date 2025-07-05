@@ -1,0 +1,13 @@
+{
+  "entity.fungal_hazard.infected": "感染者",
+  "entity.fungal_hazard.sporer": "播种者",
+  "entity.fungal_hazard.volatile": "夜魔",
+  "item.fungal_hazard.infected_spawn_egg": "感染者刷怪蛋",
+  "item.fungal_hazard.sporer_spawn_egg": "播种者刷怪蛋",
+  "item.fungal_hazard.volatile_spawn_egg": "夜魔刷怪蛋",
+  "subtitles.sporer_explosion": "播种者：爆炸",
+  "subtitles.sporer_groans": "播种者：低吼",
+  "subtitles.volatile_groans": "夜魔：低吼",
+  "subtitles.volatile_hurt": "夜魔：受伤",
+  "subtitles.volatile_roar": "夜魔：咆哮"
+}

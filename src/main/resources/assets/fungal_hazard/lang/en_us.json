@@ -1,0 +1,13 @@
+{
+  "entity.fungal_hazard.infected": "Infected",
+  "entity.fungal_hazard.sporer": "Sporer",
+  "entity.fungal_hazard.volatile": "Volatile",
+  "item.fungal_hazard.infected_spawn_egg": "Infected Spawn Egg",
+  "item.fungal_hazard.sporer_spawn_egg": "Sporer Spawn Egg",
+  "item.fungal_hazard.volatile_spawn_egg": "Volatile Spawn Egg",
+  "subtitles.sporer_explosion": "Sporer Explosion",
+  "subtitles.sporer_groans": "Sporer Groans",
+  "subtitles.volatile_groans": "Volatile Groans",
+  "subtitles.volatile_hurt": "Volatile Hurt",
+  "subtitles.volatile_roar": "Volatile Roar"
+}
