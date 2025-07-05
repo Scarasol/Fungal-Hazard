@@ -37,6 +37,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.TieredItem;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
@@ -513,9 +514,12 @@ public class VolatileEntity extends AbstractFungalZombie implements IDodgeableZo
     @Override
     public boolean doHurtTarget(Entity target) {
         boolean flag = super.doHurtTarget(target);
-        if (flag && target instanceof LivingEntity livingEntity) {
-            if (livingEntity.getUseItem().is(Items.SHIELD)) {
-                level().playSound(null, this, SoundEvents.SHIELD_BLOCK, SoundSource.PLAYERS, 1, 1);
+        if (target instanceof LivingEntity livingEntity) {
+            Level level = level();
+            double damage = this.getAttributeValue(Attributes.ATTACK_DAMAGE);
+            damage += EnchantmentHelper.getDamageBonus(this.getMainHandItem(), livingEntity.getMobType());
+            if (level.random.nextDouble() < (-9 + damage) / 8 && livingEntity.getUseItem().is(Items.SHIELD)) {
+                level.playSound(null, livingEntity, SoundEvents.SHIELD_BLOCK, SoundSource.PLAYERS, 1, 1);
                 livingEntity.stopUsingItem();
                 if (livingEntity instanceof Player player) {
                     player.getCooldowns().addCooldown(Items.SHIELD, 100);
