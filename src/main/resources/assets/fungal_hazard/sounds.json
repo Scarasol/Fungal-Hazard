@@ -23,6 +23,16 @@
       }
     ]
   },
+  "sporer_hurt": {
+    "category": "hostile",
+    "subtitle": "subtitles.sporer_hurt",
+    "sounds": [
+      {
+        "name": "fungal_hazard:sporer_hurt",
+        "stream": false
+      }
+    ]
+  },
   "sporer_death_in_creep": {
     "category": "hostile",
     "subtitle": "subtitles.sporer_explosion",
@@ -137,7 +147,7 @@
   },
   "volatile_death": {
     "category": "hostile",
-    "subtitle": "subtitles.volatile_roar",
+    "subtitle": "subtitles.volatile_death",
     "sounds": [
       {
         "name": "fungal_hazard:volatile_death",

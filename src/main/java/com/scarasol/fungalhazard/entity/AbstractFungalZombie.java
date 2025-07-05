@@ -1,13 +1,13 @@
 package com.scarasol.fungalhazard.entity;
 
 import com.google.common.collect.Maps;
-import com.scarasol.fungalhazard.FungalHazardMod;
 import com.scarasol.fungalhazard.api.IFungalHazardGeoEntity;
 import com.scarasol.fungalhazard.configuration.CommonConfig;
 import com.scarasol.fungalhazard.entity.ai.FungalZombieGroundPathNavigation;
 import com.scarasol.fungalhazard.entity.ai.fsm.FungalZombieState;
 import com.scarasol.fungalhazard.entity.ai.fsm.FungalZombieStates;
 import com.scarasol.fungalhazard.entity.goal.*;
+import com.scarasol.fungalhazard.init.FungalHazardTags;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
@@ -231,12 +231,14 @@ public abstract class AbstractFungalZombie extends Zombie implements IFungalHaza
     public abstract FungalZombieState defaultStates();
 
     public static boolean checkFungalZombieSpawnRules(EntityType<? extends AbstractFungalZombie> entityType, ServerLevelAccessor level, MobSpawnType reason, BlockPos pos, RandomSource random) {
+
         ServerLevel serverLevel = level.getLevel();
-
-        if (serverLevel.isRainingAt(pos)) {
-            return true;
+        if (serverLevel.getBiome(pos).is(FungalHazardTags.INFECTED_BLACKLIST)) {
+            return false;
         }
-
+//        if (serverLevel.isRainingAt(pos)) {
+//            return true;
+//        }
         return Monster.checkMonsterSpawnRules(entityType, level, reason, pos, random);
     }
 

@@ -14,6 +14,7 @@ public class FungalHazardSounds {
     public static final DeferredRegister<SoundEvent> REGISTRY = DeferredRegister.create(ForgeRegistries.SOUND_EVENTS, FungalHazardMod.MODID);
 
     public static final RegistryObject<SoundEvent> SPORER_IDLE = REGISTRY.register("sporer_idle", () -> SoundEvent.createVariableRangeEvent(new ResourceLocation(FungalHazardMod.MODID, "sporer_idle")));
+    public static final RegistryObject<SoundEvent> SPORER_HURT = REGISTRY.register("sporer_hurt", () -> SoundEvent.createVariableRangeEvent(new ResourceLocation(FungalHazardMod.MODID, "sporer_hurt")));
     public static final RegistryObject<SoundEvent> SPORER_DEATH = REGISTRY.register("sporer_death", () -> SoundEvent.createVariableRangeEvent(new ResourceLocation(FungalHazardMod.MODID, "sporer_death")));
     public static final RegistryObject<SoundEvent> SPORER_DEATH_IN_CREEP = REGISTRY.register("sporer_death_in_creep", () -> SoundEvent.createVariableRangeEvent(new ResourceLocation(FungalHazardMod.MODID, "sporer_death_in_creep")));
 

@@ -15,6 +15,7 @@ import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
@@ -135,6 +136,11 @@ public class SporerEntity extends AbstractMutilatableZombie {
     @Override
     protected SoundEvent getDeathSound() {
         return !isMutilation() ? FungalHazardSounds.SPORER_DEATH.get() : FungalHazardSounds.SPORER_DEATH_IN_CREEP.get();
+    }
+
+    @Override
+    protected SoundEvent getHurtSound(DamageSource damageSource) {
+        return FungalHazardSounds.SPORER_HURT.get();
     }
 
     @Override
