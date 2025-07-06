@@ -40,13 +40,15 @@ public class FungalZombieAttackGoal extends MeleeAttackGoal {
     @Override
     public void tick() {
         LivingEntity target = this.zombie.getTarget();
-        double d0 = this.zombie.distanceToSqr(target);
-        if (d0 < 25) {
-            this.zombie.setPatrolling(false);
-        }
-        super.tick();
-        if (d0 <= getAttackReachSqr(target) / 4) {
-            this.zombie.getNavigation().stop();
+        if (target != null) {
+            double d0 = this.zombie.distanceToSqr(target);
+            if (d0 < 25) {
+                this.zombie.setPatrolling(false);
+            }
+            super.tick();
+            if (d0 <= getAttackReachSqr(target) / 4) {
+                this.zombie.getNavigation().stop();
+            }
         }
     }
 
