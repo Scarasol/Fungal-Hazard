@@ -270,7 +270,7 @@ public abstract class AbstractMutilatableZombie extends AbstractFungalZombie{
 
     @Override
     public boolean canJoinPatrol() {
-        return !isMutilation();
+        return !isMutilation() && super.canJoinPatrol();
     }
 
     public PlayState animationController(AnimationState<AbstractMutilatableZombie> event) {

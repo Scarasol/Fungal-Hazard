@@ -83,6 +83,31 @@ public class InfectedEntity extends AbstractMutilatableZombie {
     }
 
     @Override
+    public double getAttackDamageModifier() {
+        return CommonConfig.INFECTED_ATTACK_DAMAGE.get() - CommonConfig.INFECTED_ATTACK_DAMAGE.getDefault();
+    }
+
+    @Override
+    public double getHealthModifier() {
+        return CommonConfig.INFECTED_HEALTH.get() - CommonConfig.INFECTED_HEALTH.getDefault();
+    }
+
+    @Override
+    public double getMovementModifier() {
+        return CommonConfig.INFECTED_MOVEMENT.get() - CommonConfig.INFECTED_MOVEMENT.getDefault();
+    }
+
+    @Override
+    public double getArmorModifier() {
+        return CommonConfig.INFECTED_ARMOR.get() - CommonConfig.INFECTED_ARMOR.getDefault();
+    }
+
+    @Override
+    public double getArmorToughnessModifier() {
+        return CommonConfig.INFECTED_ARMOR_TOUGHNESS.get() - CommonConfig.INFECTED_ARMOR_TOUGHNESS.getDefault();
+    }
+
+    @Override
     protected boolean isSunSensitive() {
         return CommonConfig.INFECTED_BURN_IN_SUN.get() && super.isSunSensitive();
     }
@@ -241,6 +266,7 @@ public class InfectedEntity extends AbstractMutilatableZombie {
                 .add(Attributes.ATTACK_DAMAGE, 3)
                 .add(Attributes.FOLLOW_RANGE, 35)
                 .add(Attributes.ARMOR, 2)
+                .add(Attributes.ARMOR_TOUGHNESS)
                 .add(Attributes.SPAWN_REINFORCEMENTS_CHANCE);
         return builder;
     }

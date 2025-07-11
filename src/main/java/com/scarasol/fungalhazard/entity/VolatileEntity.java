@@ -815,6 +815,31 @@ public class VolatileEntity extends AbstractFungalZombie implements IDodgeableZo
     }
 
     @Override
+    public double getAttackDamageModifier() {
+        return CommonConfig.VOLATILE_ATTACK_DAMAGE.get() - CommonConfig.VOLATILE_ATTACK_DAMAGE.getDefault();
+    }
+
+    @Override
+    public double getHealthModifier() {
+        return CommonConfig.VOLATILE_HEALTH.get() - CommonConfig.VOLATILE_HEALTH.getDefault();
+    }
+
+    @Override
+    public double getMovementModifier() {
+        return CommonConfig.VOLATILE_MOVEMENT.get() - CommonConfig.VOLATILE_MOVEMENT.getDefault();
+    }
+
+    @Override
+    public double getArmorModifier() {
+        return CommonConfig.VOLATILE_ARMOR.get() - CommonConfig.VOLATILE_ARMOR.getDefault();
+    }
+
+    @Override
+    public double getArmorToughnessModifier() {
+        return CommonConfig.VOLATILE_ARMOR_TOUGHNESS.get() - CommonConfig.VOLATILE_ARMOR_TOUGHNESS.getDefault();
+    }
+
+    @Override
     public double getAttackRangeModifier() {
         return 1.44;
     }

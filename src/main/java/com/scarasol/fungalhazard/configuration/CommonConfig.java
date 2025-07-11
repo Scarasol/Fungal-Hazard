@@ -14,9 +14,19 @@ public class CommonConfig {
     public static final ForgeConfigSpec.ConfigValue<Boolean> ZOMBIE_REPLACE;
     public static final ForgeConfigSpec.ConfigValue<Boolean> INFECTED_PATROLLING;
 
+    public static final ForgeConfigSpec.ConfigValue<Double> INFECTED_ATTACK_DAMAGE;
+    public static final ForgeConfigSpec.ConfigValue<Double> INFECTED_HEALTH;
+    public static final ForgeConfigSpec.ConfigValue<Double> INFECTED_MOVEMENT;
+    public static final ForgeConfigSpec.ConfigValue<Double> INFECTED_ARMOR;
+    public static final ForgeConfigSpec.ConfigValue<Double> INFECTED_ARMOR_TOUGHNESS;
     public static final ForgeConfigSpec.ConfigValue<Double> INFECTED_RUN_CHANCE;
     public static final ForgeConfigSpec.ConfigValue<Boolean> INFECTED_BURN_IN_SUN;
 
+    public static final ForgeConfigSpec.ConfigValue<Double> SPORER_ATTACK_DAMAGE;
+    public static final ForgeConfigSpec.ConfigValue<Double> SPORER_HEALTH;
+    public static final ForgeConfigSpec.ConfigValue<Double> SPORER_MOVEMENT;
+    public static final ForgeConfigSpec.ConfigValue<Double> SPORER_ARMOR;
+    public static final ForgeConfigSpec.ConfigValue<Double> SPORER_ARMOR_TOUGHNESS;
     public static final ForgeConfigSpec.ConfigValue<Double> SPORER_RANGE;
     public static final ForgeConfigSpec.ConfigValue<Double> SPORER_HEAL_AMOUNT;
     public static final ForgeConfigSpec.ConfigValue<Integer> SPORER_INFECTION_LEVEL;
@@ -26,6 +36,11 @@ public class CommonConfig {
     public static final ForgeConfigSpec.ConfigValue<Integer> SPORER_ABILITY_TIME_DEATH;
     public static final ForgeConfigSpec.ConfigValue<Boolean> SPORER_BURN_IN_SUN;
 
+    public static final ForgeConfigSpec.ConfigValue<Double> VOLATILE_ATTACK_DAMAGE;
+    public static final ForgeConfigSpec.ConfigValue<Double> VOLATILE_HEALTH;
+    public static final ForgeConfigSpec.ConfigValue<Double> VOLATILE_MOVEMENT;
+    public static final ForgeConfigSpec.ConfigValue<Double> VOLATILE_ARMOR;
+    public static final ForgeConfigSpec.ConfigValue<Double> VOLATILE_ARMOR_TOUGHNESS;
     public static final ForgeConfigSpec.ConfigValue<Boolean> VOLATILE_EQUIPMENT;
     public static final ForgeConfigSpec.ConfigValue<Double> VOLATILE_EXECUTION_DAMAGE;
     public static final ForgeConfigSpec.ConfigValue<Integer> VOLATILE_EXECUTION_TIME;
@@ -50,14 +65,35 @@ public class CommonConfig {
         BUILDER.pop();
 
         BUILDER.push("Infected");
+        INFECTED_ATTACK_DAMAGE = BUILDER.comment("The attack damage attribute of Infected. Final value is multiplied by 1.5 in Hard mode.")
+                .defineInRange("Infected Attack Damage", 3, 0, 2048D);
+        INFECTED_HEALTH = BUILDER.comment("The health attribute of Infected.")
+                .defineInRange("Infected Health", 20, 0, 1024D);
+        INFECTED_MOVEMENT = BUILDER.comment("The movement attribute of Infected.")
+                .defineInRange("Infected Movement", 0.23, 0, 1024D);
+        INFECTED_ARMOR = BUILDER.comment("The armor attribute of Infected.")
+                .defineInRange("Infected Armor", 2, 0, 30D);
+        INFECTED_ARMOR_TOUGHNESS = BUILDER.comment("The armor toughness attribute of Infected.")
+                .defineInRange("Infected Armor Toughness", 0, 0, 20D);
+
         INFECTED_RUN_CHANCE = BUILDER.comment("Chance for an Infected to be able to run.")
                 .defineInRange("Infected Run Chance", 0.3, 0, 1.0);
-
         INFECTED_BURN_IN_SUN = BUILDER.comment("Determines whether Infected will burn when exposed to sunlight.")
                 .define("Infected Burn in Sun", true);
         BUILDER.pop();
 
         BUILDER.push("Sporer");
+        SPORER_ATTACK_DAMAGE = BUILDER.comment("The attack damage attribute of Sporer. Final value is multiplied by 1.5 in Hard mode.")
+                .defineInRange("Sporer Attack Damage", 2, 0, 2048D);
+        SPORER_HEALTH = BUILDER.comment("The health attribute of Sporer.")
+                .defineInRange("Sporer Health", 30, 0, 1024D);
+        SPORER_MOVEMENT = BUILDER.comment("The movement attribute of Sporer.")
+                .defineInRange("Sporer Movement", 0.23, 0, 1024D);
+        SPORER_ARMOR = BUILDER.comment("The armor attribute of Sporer.")
+                .defineInRange("Sporer Armor", 2, 0, 30D);
+        SPORER_ARMOR_TOUGHNESS = BUILDER.comment("The armor toughness attribute of Sporer.")
+                .defineInRange("Sporer Armor Toughness", 0, 0, 20D);
+
         SPORER_RANGE = BUILDER.comment("The effective range of the Sporer's ability.")
                 .defineInRange("Sporer Ability Range", 6, 0.0, 50.0);
 
@@ -84,6 +120,17 @@ public class CommonConfig {
         BUILDER.pop();
 
         BUILDER.push("Volatile");
+        VOLATILE_ATTACK_DAMAGE = BUILDER.comment("The attack damage attribute of Volatile. Final value is multiplied by 1.5 in Hard mode.")
+                .defineInRange("Volatile Attack Damage", 13, 0, 2048D);
+        VOLATILE_HEALTH = BUILDER.comment("The health attribute of Volatile.")
+                .defineInRange("Volatile Health", 85, 0, 1024D);
+        VOLATILE_MOVEMENT = BUILDER.comment("The movement attribute of Volatile.")
+                .defineInRange("Volatile Movement", 0.45, 0, 1024D);
+        VOLATILE_ARMOR = BUILDER.comment("The armor attribute of Volatile.")
+                .defineInRange("Volatile Armor", 15, 0, 30D);
+        VOLATILE_ARMOR_TOUGHNESS = BUILDER.comment("The armor toughness attribute of Volatile.")
+                .defineInRange("Volatile Armor Toughness", 8, 0, 20D);
+
 
         VOLATILE_EQUIPMENT = BUILDER.comment("Determines whether Volatile can have equipment.")
                 .define("Volatile Equipment", true);

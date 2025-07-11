@@ -20,6 +20,10 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.AttributeMap;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.MoveThroughVillageGoal;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
@@ -40,6 +44,7 @@ import software.bernie.geckolib.util.GeckoLibUtil;
 
 import javax.annotation.Nullable;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * @author Scarasol
@@ -51,6 +56,11 @@ public abstract class AbstractFungalZombie extends Zombie implements IFungalHaza
 
     public static final EntityDataAccessor<Integer> STATE = SynchedEntityData.defineId(AbstractFungalZombie.class, EntityDataSerializers.INT);
 
+    public static final UUID SPAWN_MODIFIER = UUID.fromString("3606EAA0-0711-7B20-6FEA-1B6E1EFB535C");
+//    public static final UUID HEALTH_MODIFIER = UUID.fromString("6C53F861-5F06-B37C-3BBA-CE9A64139214");
+//    public static final UUID MOVEMENT_MODIFIER = UUID.fromString("9576CFEC-AE8C-7FF8-0612-52DA09D7632B");
+//    public static final UUID ARMOR_MODIFIER = UUID.fromString("5CDAC255-47E4-3E04-B51E-28F64AB10F0C");
+//    public static final UUID ARMOR_TOUGHNESS_MODIFIER = UUID.fromString("9DE7C1C5-1772-C598-CFA4-230C16C22781");
 
     @Nullable
     private BlockPos patrolTarget;
@@ -91,10 +101,26 @@ public abstract class AbstractFungalZombie extends Zombie implements IFungalHaza
         this.goalSelector.addGoal(3, new FungalZombiePatrolGoal<>(this, 0.7D, 0.595D));
     }
 
+
+    @Override
+    protected float getStandingEyeHeight(Pose pose, EntityDimensions entityDimensions) {
+        return entityDimensions.height * 0.85F;
+    }
+
     @Override
     @Nullable
     public SpawnGroupData finalizeSpawn(ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag) {
         setState(defaultStates());
+        if (spawnGroupData == null) {
+            spawnGroupData = new Zombie.ZombieGroupData(false, false);
+        }
+        getAttribute(Attributes.ATTACK_DAMAGE).addPermanentModifier(new AttributeModifier(SPAWN_MODIFIER, "FungalHazardSpawnModifier", getAttackDamageModifier(), AttributeModifier.Operation.ADDITION));
+        float healthRate = getHealth() / getMaxHealth();
+        getAttribute(Attributes.MAX_HEALTH).addPermanentModifier(new AttributeModifier(SPAWN_MODIFIER, "FungalHazardSpawnModifier", getHealthModifier(), AttributeModifier.Operation.ADDITION));
+        setHealth(getMaxHealth() * healthRate);
+        getAttribute(Attributes.MOVEMENT_SPEED).addPermanentModifier(new AttributeModifier(SPAWN_MODIFIER, "FungalHazardSpawnModifier", getMovementModifier(), AttributeModifier.Operation.ADDITION));
+        getAttribute(Attributes.ARMOR).addPermanentModifier(new AttributeModifier(SPAWN_MODIFIER, "FungalHazardSpawnModifier", getArmorModifier(), AttributeModifier.Operation.ADDITION));
+        getAttribute(Attributes.ARMOR_TOUGHNESS).addPermanentModifier(new AttributeModifier(SPAWN_MODIFIER, "FungalHazardSpawnModifier", getArmorToughnessModifier(), AttributeModifier.Operation.ADDITION));
         return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
     }
 
@@ -110,6 +136,16 @@ public abstract class AbstractFungalZombie extends Zombie implements IFungalHaza
         this.targetSelector.addGoal(3, new FungalZombieNearestAttackableTargetGoal<>(this, IronGolem.class, true, this::testAttackable));
         this.targetSelector.addGoal(5, new FungalZombieNearestAttackableTargetGoal<>(this, Turtle.class, 10, true, false, livingEntity -> testAttackable(this) && Turtle.BABY_ON_LAND_SELECTOR.test(this)));
     }
+
+    public abstract double getAttackDamageModifier();
+
+    public abstract double getHealthModifier();
+
+    public abstract double getMovementModifier();
+
+    public abstract double getArmorModifier();
+
+    public abstract double getArmorToughnessModifier();
 
     public abstract boolean testAttackable(LivingEntity livingEntity);
 

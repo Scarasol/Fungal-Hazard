@@ -106,6 +106,31 @@ public class SporerEntity extends AbstractMutilatableZombie {
     }
 
     @Override
+    public double getAttackDamageModifier() {
+        return CommonConfig.SPORER_ATTACK_DAMAGE.get() - CommonConfig.SPORER_ATTACK_DAMAGE.getDefault();
+    }
+
+    @Override
+    public double getHealthModifier() {
+        return CommonConfig.SPORER_HEALTH.get() - CommonConfig.SPORER_HEALTH.getDefault();
+    }
+
+    @Override
+    public double getMovementModifier() {
+        return CommonConfig.SPORER_MOVEMENT.get() - CommonConfig.SPORER_MOVEMENT.getDefault();
+    }
+
+    @Override
+    public double getArmorModifier() {
+        return CommonConfig.SPORER_ARMOR.get() - CommonConfig.SPORER_ARMOR.getDefault();
+    }
+
+    @Override
+    public double getArmorToughnessModifier() {
+        return CommonConfig.SPORER_ARMOR_TOUGHNESS.get() - CommonConfig.SPORER_ARMOR_TOUGHNESS.getDefault();
+    }
+
+    @Override
     public double getAttackRangeModifier() {
         return 1;
     }
@@ -291,6 +316,7 @@ public class SporerEntity extends AbstractMutilatableZombie {
                 .add(Attributes.ATTACK_DAMAGE, 2)
                 .add(Attributes.FOLLOW_RANGE, 35)
                 .add(Attributes.ARMOR, 2)
+                .add(Attributes.ARMOR_TOUGHNESS)
                 .add(Attributes.SPAWN_REINFORCEMENTS_CHANCE);
         return builder;
     }
