@@ -3,6 +3,7 @@ package com.scarasol.fungalhazard.entity;
 import com.scarasol.fungalhazard.configuration.CommonConfig;
 import com.scarasol.fungalhazard.entity.ai.fsm.FungalZombieState;
 import com.scarasol.fungalhazard.entity.ai.fsm.FungalZombieStates;
+import com.scarasol.fungalhazard.entity.ai.fsm.StateHandler;
 import com.scarasol.fungalhazard.init.FungalHazardEntities;
 import com.scarasol.fungalhazard.init.FungalHazardParticleTypes;
 import com.scarasol.fungalhazard.init.FungalHazardSounds;
@@ -51,8 +52,8 @@ public class SporerEntity extends AbstractMutilatableZombie {
     @Override
     public void registerStateRunner() {
         super.registerStateRunner();
-        putStateRunner(FungalZombieStates.RUN, this::defaultState);
-        putStateRunner(FungalZombieStates.IDLE, this::defaultState);
+        putStateRunner(FungalZombieStates.RUN, new StateHandler(StateHandler.EMPTY_RUNNER, this::defaultState,StateHandler.EMPTY_RUNNER));
+        putStateRunner(FungalZombieStates.IDLE, new StateHandler(StateHandler.EMPTY_RUNNER, this::defaultState,StateHandler.EMPTY_RUNNER));
     }
 
     private void defaultState(FungalZombieState state) {
@@ -265,10 +266,6 @@ public class SporerEntity extends AbstractMutilatableZombie {
                 }
             }
             timeTicker = (timeTicker + 1) % 10;
-//            setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.LEATHER_HELMET));
-//            setItemSlot(EquipmentSlot.CHEST, new ItemStack(Items.IRON_CHESTPLATE));
-//            setItemSlot(EquipmentSlot.LEGS, new ItemStack(ZombieKitItems.FOREST_RIOT_LEGGINGS.get()));
-//            setItemSlot(EquipmentSlot.FEET, new ItemStack(Items.DIAMOND_BOOTS));
         }
         super.aiStep();
     }

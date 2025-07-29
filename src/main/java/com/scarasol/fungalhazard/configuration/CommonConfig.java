@@ -42,6 +42,8 @@ public class CommonConfig {
     public static final ForgeConfigSpec.ConfigValue<Double> VOLATILE_ARMOR;
     public static final ForgeConfigSpec.ConfigValue<Double> VOLATILE_ARMOR_TOUGHNESS;
     public static final ForgeConfigSpec.ConfigValue<Boolean> VOLATILE_EQUIPMENT;
+    public static final ForgeConfigSpec.ConfigValue<Boolean> VOLATILE_BURN_IN_SUN;
+    public static final ForgeConfigSpec.ConfigValue<Boolean> VOLATILE_FLEE_IN_SUN;
     public static final ForgeConfigSpec.ConfigValue<Double> VOLATILE_EXECUTION_DAMAGE;
     public static final ForgeConfigSpec.ConfigValue<Integer> VOLATILE_EXECUTION_TIME;
     public static final ForgeConfigSpec.ConfigValue<Double> VOLATILE_ESCAPE_DAMAGE;
@@ -134,6 +136,12 @@ public class CommonConfig {
 
         VOLATILE_EQUIPMENT = BUILDER.comment("Determines whether Volatile can have equipment.")
                 .define("Volatile Equipment", true);
+
+        VOLATILE_BURN_IN_SUN = BUILDER.comment("Determines whether Volatile will burn when exposed to sunlight.")
+                .define("Volatile Burn in Sun", true);
+
+        VOLATILE_FLEE_IN_SUN = BUILDER.comment("Determines whether Volatile will flee when exposed to sunlight.")
+                .define("Volatile Flee in Sun", true);
 
         BUILDER.push("Execution");
         VOLATILE_EXECUTION_DAMAGE = BUILDER.comment("Damage multiplier of Volatile execution.")

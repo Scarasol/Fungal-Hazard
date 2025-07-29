@@ -1,8 +1,10 @@
 package com.scarasol.fungalhazard.entity;
 
+import com.scarasol.fungalhazard.FungalHazardMod;
 import com.scarasol.fungalhazard.configuration.CommonConfig;
 import com.scarasol.fungalhazard.entity.ai.fsm.FungalZombieState;
 import com.scarasol.fungalhazard.entity.ai.fsm.FungalZombieStates;
+import com.scarasol.fungalhazard.entity.ai.fsm.StateHandler;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -166,14 +168,13 @@ public abstract class AbstractMutilatableZombie extends AbstractFungalZombie{
 
     @Override
     public void registerStateRunner() {
-        putStateRunner(FungalZombieStates.START_FALL, this::startFallState);
-        putStateRunner(FungalZombieStates.FALL, this::fallState);
-        putStateRunner(FungalZombieStates.START_CREEP, this::startCreepState);
+
+        putStateRunner(FungalZombieStates.FALL, new StateHandler(this::startFallState, this::fallState, StateHandler.EMPTY_RUNNER));
+        putStateRunner(FungalZombieStates.CREEP, new StateHandler(this::startCreepState, StateHandler.EMPTY_RUNNER, StateHandler.EMPTY_RUNNER));
     }
 
     public void startFallState(FungalZombieState state) {
         if (isAlive()) {
-            setState(FungalZombieStates.FALL);
             addKnockBackAttributeModifier();
             setAnimationTick(fallAnimation());
             this.getNavigation().stop();
@@ -184,15 +185,14 @@ public abstract class AbstractMutilatableZombie extends AbstractFungalZombie{
     public void fallState(FungalZombieState state) {
         if (getAnimationTick() == 0 && !level().isClientSide) {
             if (level().random.nextDouble() < 0.01) {
-                setAnimationTick(startCreep());
-                setState(FungalZombieStates.START_CREEP);
+                setState(FungalZombieStates.CREEP);
             }
         }
     }
 
     public void startCreepState(FungalZombieState state) {
-        if (getAnimationTick() == 0 && !level().isClientSide) {
-            setState(FungalZombieStates.CREEP);
+        if (!level().isClientSide) {
+            setAnimationTick(startCreep());
         }
     }
 
@@ -210,11 +210,11 @@ public abstract class AbstractMutilatableZombie extends AbstractFungalZombie{
                     double difference = Math.tan(Math.toRadians(angle)) * horizontalDistance;
                     double hitY = entity.getY() + difference;
                     if (hitY < getOnPos().getY() + 1 + getBbHeight() * 0.35) {
-                        setState(FungalZombieStates.START_FALL);
+                        setState(FungalZombieStates.FALL);
                     }
                 }
             }else if (damageSource.is(DamageTypeTags.IS_FALL) && level().random.nextDouble() < amount * 3 / getMaxHealth()) {
-                setState(FungalZombieStates.START_FALL);
+                setState(FungalZombieStates.FALL);
             }
         }
         return super.hurt(damageSource, amount);

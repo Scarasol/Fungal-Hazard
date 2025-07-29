@@ -4,31 +4,20 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.scarasol.fungalhazard.client.model.FungalZombieEntityModel;
 import com.scarasol.fungalhazard.entity.AbstractFungalZombie;
-import com.scarasol.fungalhazard.entity.VolatileEntity;
-import com.scarasol.fungalhazard.init.FungalHazardEntities;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.model.HumanoidModel;
-import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.Mob;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.Blocks;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
-import software.bernie.geckolib.cache.GeckoLibCache;
 import software.bernie.geckolib.cache.object.BakedGeoModel;
 import software.bernie.geckolib.cache.object.GeoBone;
 import software.bernie.geckolib.model.GeoModel;
-import software.bernie.geckolib.renderer.layer.ItemArmorGeoLayer;
 
 import java.util.Optional;
 
@@ -102,19 +91,21 @@ public class FungalZombieEntityRenderer<T extends AbstractFungalZombie> extends 
     @Override
     public void actuallyRender(PoseStack poseStack, T animatable, BakedGeoModel model, RenderType renderType, MultiBufferSource bufferSource, VertexConsumer buffer, boolean isReRender, float partialTick, int packedLight, int packedOverlay, float red, float green, float blue, float alpha) {
         super.actuallyRender(poseStack, animatable, model, renderType, bufferSource, buffer, isReRender, partialTick, packedLight, packedOverlay, red, green, blue, alpha);
-        if (mainPose != null) {
-            Optional<GeoBone> mainHandBone = model.getBone("MainHandItem");
-            if (mainHandBone.isPresent() && canRenderMainHandItem(animatable)) {
-                GeoBone bone = mainHandBone.get();
-                renderItem(bone, poseStack, mainPose, mainNormal, packedLight, bufferSource, true);
+        if (!isReRender) {
+            if (mainPose != null) {
+                Optional<GeoBone> mainHandBone = model.getBone("MainHandItem");
+                if (mainHandBone.isPresent() && canRenderMainHandItem(animatable)) {
+                    GeoBone bone = mainHandBone.get();
+                    renderItem(bone, poseStack, mainPose, mainNormal, packedLight, bufferSource, true);
+                }
             }
-        }
 
-        if (offPose != null) {
-            Optional<GeoBone> offHandBone = model.getBone("OffHandItem");
-            if (offHandBone.isPresent() && canRenderOffHandItem(animatable)) {
-                GeoBone bone = offHandBone.get();
-                renderItem(bone, poseStack, offPose, offNormal, packedLight, bufferSource, false);
+            if (offPose != null) {
+                Optional<GeoBone> offHandBone = model.getBone("OffHandItem");
+                if (offHandBone.isPresent() && canRenderOffHandItem(animatable)) {
+                    GeoBone bone = offHandBone.get();
+                    renderItem(bone, poseStack, offPose, offNormal, packedLight, bufferSource, false);
+                }
             }
         }
 
@@ -124,19 +115,21 @@ public class FungalZombieEntityRenderer<T extends AbstractFungalZombie> extends 
         poseStack.pushPose();
         poseStack.last().pose().zero().add(pose);
         poseStack.last().normal().zero().add(normal);
+        ItemStack itemStack = mainHand ? animatable.getMainHandItem() : animatable.getOffhandItem();
         poseStack.translate(bone.getPivotX() / 16, bone.getPivotY() / 16, bone.getPivotZ() / 16);
         poseStack.mulPose(new Quaternionf().rotateZYX(bone.getRotZ(), bone.getRotY(), bone.getRotX()));
-        ItemStack itemStack = mainHand ? animatable.getMainHandItem() : animatable.getOffhandItem();
+
         if (!itemStack.isEmpty()) {
-            Minecraft.getInstance().getItemRenderer().renderStatic(
+            ItemRenderer itemRenderer = Minecraft.getInstance().getItemRenderer();
+            itemRenderer.render(
                     itemStack,
-                    ItemDisplayContext.THIRD_PERSON_RIGHT_HAND,
-                    packedLight,
-                    OverlayTexture.NO_OVERLAY,
+                    mainHand ? ItemDisplayContext.THIRD_PERSON_RIGHT_HAND : ItemDisplayContext.THIRD_PERSON_LEFT_HAND,
+                    !mainHand,
                     poseStack,
                     bufferSource,
-                    null,
-                    0
+                    packedLight,
+                    OverlayTexture.NO_OVERLAY,
+                    itemRenderer.getModel(itemStack, Minecraft.getInstance().level, animatable, 0)
             );
         }
 //        else if (mainHand && !(animatable instanceof VolatileEntity)) {

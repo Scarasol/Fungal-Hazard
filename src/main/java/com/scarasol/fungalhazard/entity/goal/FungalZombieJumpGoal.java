@@ -33,7 +33,7 @@ public class FungalZombieJumpGoal<T extends AbstractFungalZombie & IJumpZombie> 
         LivingEntity livingentity = this.zombie.getTarget();
         if (livingentity != null) {
             this.zombie.getLookControl().setLookAt(livingentity, 60.0F, 30.0F);
-            this.zombie.setState(FungalZombieStates.START_JUMP);
+            this.zombie.setState(FungalZombieStates.JUMP);
             this.zombie.setLastJumpTime(this.zombie.level().getGameTime());
             this.zombie.getNavigation().stop();
         }

@@ -6,6 +6,7 @@ import com.scarasol.fungalhazard.api.IJumpZombie;
 import com.scarasol.fungalhazard.configuration.CommonConfig;
 import com.scarasol.fungalhazard.entity.ai.fsm.FungalZombieState;
 import com.scarasol.fungalhazard.entity.ai.fsm.FungalZombieStates;
+import com.scarasol.fungalhazard.entity.ai.fsm.StateHandler;
 import com.scarasol.fungalhazard.entity.goal.*;
 import com.scarasol.fungalhazard.init.FungalHazardEntities;
 import com.scarasol.fungalhazard.init.FungalHazardSounds;
@@ -30,6 +31,7 @@ import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.AxeItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.TieredItem;
@@ -431,9 +433,6 @@ public class VolatileEntity extends AbstractFungalZombie implements IDodgeableZo
                             canGuard = false;
                             if (level().random.nextDouble() < 0.8 && canJumpWithoutDistance() && getDodgeCount() > 0 && dodge()) {
                                 setAnimationTick(0);
-                                canGuard = true;
-                                guardCount = 0;
-                                lastGuardTime = level().getGameTime();
                             } else {
                                 setAnimationTick(27);
                                 attackAnimation();
@@ -500,7 +499,7 @@ public class VolatileEntity extends AbstractFungalZombie implements IDodgeableZo
                     livingEntity.addEffect(new MobEffectInstance(MobEffects.DIG_SLOWDOWN, CommonConfig.VOLATILE_EXECUTION_TIME.get() * 20, 1, true, false));
                 }
                 setDeltaMovement(getDeltaMovement().scale(0.5));
-                setState(FungalZombieStates.START_RIDING);
+                setState(FungalZombieStates.RIDING);
             }
         } else {
             super.push(target);
@@ -510,7 +509,7 @@ public class VolatileEntity extends AbstractFungalZombie implements IDodgeableZo
     @Override
     public boolean doHurtTarget(Entity target) {
         boolean flag = super.doHurtTarget(target);
-        if (target instanceof LivingEntity livingEntity) {
+        if (flag && target instanceof LivingEntity livingEntity) {
             Level level = level();
             double damage = this.getAttributeValue(Attributes.ATTACK_DAMAGE);
             damage += EnchantmentHelper.getDamageBonus(this.getMainHandItem(), livingEntity.getMobType());
@@ -519,6 +518,7 @@ public class VolatileEntity extends AbstractFungalZombie implements IDodgeableZo
                 livingEntity.stopUsingItem();
                 if (livingEntity instanceof Player player) {
                     player.getCooldowns().addCooldown(Items.SHIELD, 100);
+                    this.level().broadcastEntityEvent(player, (byte)30);
                 }
             }
         }
@@ -589,50 +589,57 @@ public class VolatileEntity extends AbstractFungalZombie implements IDodgeableZo
 
     @Override
     public void registerStateRunner() {
-        putStateRunner(FungalZombieStates.START_RIDING, this::startRidingState);
-        putStateRunner(FungalZombieStates.RIDING, this::ridingState);
-        putStateRunner(FungalZombieStates.EXECUTION, this::executionState);
-        putStateRunner(FungalZombieStates.DODGE, this::hangState);
-        putStateRunner(FungalZombieStates.START_JUMP, this::startJumpState);
-        putStateRunner(FungalZombieStates.JUMP, this::jumpState);
-        putStateRunner(FungalZombieStates.JUMPING, this::hangState);
-        putStateRunner(FungalZombieStates.GROUND, this::groundState);
-        putStateRunner(FungalZombieStates.IDLE, this::defaultState);
-        putStateRunner(FungalZombieStates.RUN, this::defaultState);
-        putStateRunner(FungalZombieStates.FLEE, this::defaultState);
-        putStateRunner(FungalZombieStates.GUARD, this::guardState);
+        putStateRunner(FungalZombieStates.RIDING, new StateHandler(this::startRidingState, this::ridingState, this::endRidingState));
+        putStateRunner(FungalZombieStates.EXECUTION, new StateHandler(this::startExecutionState, this::executionState, StateHandler.EMPTY_RUNNER));
+        putStateRunner(FungalZombieStates.DODGE, new StateHandler(StateHandler.EMPTY_RUNNER, this::hangState, StateHandler.EMPTY_RUNNER));
+        putStateRunner(FungalZombieStates.JUMP, new StateHandler(this::startJumpState, this::jumpState, StateHandler.EMPTY_RUNNER));
+        putStateRunner(FungalZombieStates.JUMPING, new StateHandler(StateHandler.EMPTY_RUNNER, this::hangState, StateHandler.EMPTY_RUNNER));
+        putStateRunner(FungalZombieStates.GROUND, new StateHandler(this::startGroundState, this::groundState, StateHandler.EMPTY_RUNNER));
+        putStateRunner(FungalZombieStates.IDLE, new StateHandler(StateHandler.EMPTY_RUNNER, this::defaultState, StateHandler.EMPTY_RUNNER));
+        putStateRunner(FungalZombieStates.RUN, new StateHandler(StateHandler.EMPTY_RUNNER, this::defaultState, StateHandler.EMPTY_RUNNER));
+        putStateRunner(FungalZombieStates.FLEE, new StateHandler(StateHandler.EMPTY_RUNNER, this::defaultState, StateHandler.EMPTY_RUNNER));
+        putStateRunner(FungalZombieStates.GUARD, new StateHandler(StateHandler.EMPTY_RUNNER, this::guardState, this::endGuardState));
     }
 
     public void ridingState(FungalZombieState state) {
         if (!level().isClientSide()) {
             Entity entity = getFirstPassenger();
-            if (entity != null && !(level().isDay() && level().canSeeSky(blockPosition()) && !level().isRainingAt(blockPosition()))) {
+            if (entity != null) {
                 if (damageInRiding > getMaxHealth() * CommonConfig.VOLATILE_ESCAPE_DAMAGE.get()) {
                     entity.stopRiding();
                     staggerAnimation();
-                    damageInRiding = 0;
-                    ridingTick = 0;
                     playSound(FungalHazardSounds.VOLATILE_EXECUTION_FAILURE.get());
                     setState(FungalZombieStates.GROUND);
                 } else {
                     if (ridingTick++ > CommonConfig.VOLATILE_EXECUTION_TIME.get() * 20) {
-                        playSound(FungalHazardSounds.VOLATILE_EXECUTION.get());
-                        damageInRiding = 0;
-                        ridingTick = 0;
                         setState(FungalZombieStates.EXECUTION);
-                        setAnimationTick(43);
                     }
                 }
             } else {
-                if (entity != null) {
-                    entity.stopRiding();
-                }
-                damageInRiding = 0;
-                ridingTick = 0;
                 setState(FungalZombieStates.GROUND);
                 executionGroundAnimation();
             }
         }
+    }
+
+    public void endRidingState(FungalZombieState state) {
+        damageInRiding = 0;
+        ridingTick = 0;
+    }
+
+    public void startExecutionState(FungalZombieState state) {
+        if (!CommonConfig.VOLATILE_FLEE_IN_SUN.get() || !(level().isDay() && level().canSeeSky(blockPosition()) && !level().isRainingAt(blockPosition()))) {
+            setAnimationTick(43);
+            playSound(FungalHazardSounds.VOLATILE_EXECUTION.get());
+        } else {
+            Entity entity = getFirstPassenger();
+            if (entity != null) {
+                entity.stopRiding();
+            }
+            setState(FungalZombieStates.GROUND);
+            executionGroundAnimation();
+        }
+
     }
 
     public void executionState(FungalZombieState state) {
@@ -679,19 +686,21 @@ public class VolatileEntity extends AbstractFungalZombie implements IDodgeableZo
             }
             triggerAnim("animationController", "start_jump");
             setAnimationTick(10);
-            setState(FungalZombieStates.JUMP);
         }
-
     }
 
     public void defaultState(FungalZombieState state) {
         if (!level().isClientSide()) {
-            if (level().isDay() && level().canSeeSky(blockPosition()) && !level().isRainingAt(blockPosition())) {
+            if (CommonConfig.VOLATILE_FLEE_IN_SUN.get() && level().isDay() && level().canSeeSky(blockPosition()) && !level().isRainingAt(blockPosition())) {
                 setState(FungalZombieStates.FLEE);
             } else {
                 setState(defaultStates());
             }
         }
+    }
+
+    public void startGroundState(FungalZombieState state) {
+        refreshDimensions();
     }
 
     public void groundState(FungalZombieState state) {
@@ -700,18 +709,26 @@ public class VolatileEntity extends AbstractFungalZombie implements IDodgeableZo
                 setState(defaultStates());
             }
         }
-        refreshDimensions();
     }
 
     public void startRidingState(FungalZombieState state) {
-        setState(FungalZombieStates.RIDING);
         setDiscardFriction(false);
-        refreshDimensions();
-        playSound(FungalHazardSounds.VOLATILE_RIDING.get());
-        if (getFirstPassenger() instanceof Player player) {
-            player.setXRot(-30);
-            player.resetAttackStrengthTicker();
+        Entity entity = getFirstPassenger();
+        if (entity != null) {
+            if (!CommonConfig.VOLATILE_FLEE_IN_SUN.get() || !(level().isDay() && level().canSeeSky(blockPosition()) && !level().isRainingAt(blockPosition()))) {
+                refreshDimensions();
+                playSound(FungalHazardSounds.VOLATILE_RIDING.get());
+                if (entity instanceof Player player) {
+                    player.setXRot(-30);
+                    player.resetAttackStrengthTicker();
+                }
+                return;
+            }
         }
+        executionGroundAnimation();
+        setState(FungalZombieStates.GROUND);
+
+
     }
 
     public void jumpState(FungalZombieState state) {
@@ -745,9 +762,6 @@ public class VolatileEntity extends AbstractFungalZombie implements IDodgeableZo
         if (!level().isClientSide()) {
             if (getAnimationTick() <= 0) {
                 setState(defaultStates());
-                canGuard = true;
-                guardCount = 0;
-                lastGuardTime = level().getGameTime();
             } else if (getAnimationTick() == 10 && !canGuard) {
                 Vec3 lookAngle = this.calculateViewVector(0, Mth.wrapDegrees(yBodyRot));
                 level().getEntitiesOfClass(LivingEntity.class, getBoundingBox().inflate(5),
@@ -755,6 +769,12 @@ public class VolatileEntity extends AbstractFungalZombie implements IDodgeableZo
                         .forEach(this::doHurtTarget);
             }
         }
+    }
+
+    public void endGuardState(FungalZombieState state) {
+        canGuard = true;
+        guardCount = 0;
+        lastGuardTime = level().getGameTime();
     }
 
     @Override
@@ -851,6 +871,9 @@ public class VolatileEntity extends AbstractFungalZombie implements IDodgeableZo
 
     @Override
     public boolean testAttackable(LivingEntity livingEntity) {
+        if (!CommonConfig.VOLATILE_FLEE_IN_SUN.get()) {
+            return true;
+        }
         return !level().isDay() || level().isRainingAt(livingEntity.blockPosition()) || !level().canSeeSky(livingEntity.blockPosition());
     }
 
@@ -890,6 +913,11 @@ public class VolatileEntity extends AbstractFungalZombie implements IDodgeableZo
             this.remove(Entity.RemovalReason.KILLED);
         }
         setPose(Pose.DYING);
+    }
+
+    @Override
+    protected boolean isSunSensitive() {
+        return CommonConfig.VOLATILE_BURN_IN_SUN.get() && super.isSunSensitive();
     }
 
     @Override

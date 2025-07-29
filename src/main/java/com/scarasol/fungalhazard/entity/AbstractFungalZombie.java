@@ -1,11 +1,13 @@
 package com.scarasol.fungalhazard.entity;
 
 import com.google.common.collect.Maps;
+import com.scarasol.fungalhazard.FungalHazardMod;
 import com.scarasol.fungalhazard.api.IFungalHazardGeoEntity;
 import com.scarasol.fungalhazard.configuration.CommonConfig;
 import com.scarasol.fungalhazard.entity.ai.FungalZombieGroundPathNavigation;
 import com.scarasol.fungalhazard.entity.ai.fsm.FungalZombieState;
 import com.scarasol.fungalhazard.entity.ai.fsm.FungalZombieStates;
+import com.scarasol.fungalhazard.entity.ai.fsm.StateHandler;
 import com.scarasol.fungalhazard.entity.goal.*;
 import com.scarasol.fungalhazard.init.FungalHazardTags;
 import net.minecraft.core.BlockPos;
@@ -20,8 +22,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.entity.*;
-import net.minecraft.world.entity.ai.attributes.AttributeInstance;
-import net.minecraft.world.entity.ai.attributes.AttributeMap;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.MoveThroughVillageGoal;
@@ -42,6 +42,7 @@ import software.bernie.geckolib.animatable.SingletonGeoAnimatable;
 import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.util.GeckoLibUtil;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Map;
 import java.util.UUID;
@@ -69,7 +70,10 @@ public abstract class AbstractFungalZombie extends Zombie implements IFungalHaza
     private boolean hasLeader;
     private AbstractFungalZombie leader;
     private int animationTick;
-    private final Map<FungalZombieState, StateRunner> stateRunners = Maps.newHashMap();
+    private final Map<FungalZombieState, StateHandler> stateHandlers = Maps.newHashMap();
+
+    private FungalZombieState oldState;
+
 
     public AbstractFungalZombie(EntityType<? extends Zombie> entityType, Level level) {
         super(entityType, level);
@@ -105,6 +109,16 @@ public abstract class AbstractFungalZombie extends Zombie implements IFungalHaza
     @Override
     protected float getStandingEyeHeight(Pose pose, EntityDimensions entityDimensions) {
         return entityDimensions.height * 0.85F;
+    }
+
+    @Override
+    public void onSyncedDataUpdated(EntityDataAccessor<?> entityDataAccessor) {
+        if (entityDataAccessor.equals(STATE)) {
+            FungalZombieState stateNew = getState();
+            switchState(oldState, stateNew);
+            oldState = stateNew;
+        }
+        super.onSyncedDataUpdated(entityDataAccessor);
     }
 
     @Override
@@ -159,13 +173,13 @@ public abstract class AbstractFungalZombie extends Zombie implements IFungalHaza
         return this.getBbWidth() * 2.0F * this.getBbWidth() * 2.0F * getAttackRangeModifier() + target.getBbWidth();
     }
 
-    public void putStateRunner(FungalZombieState state, StateRunner runner) {
-        stateRunners.put(state, runner);
+    public void putStateRunner(FungalZombieState state, StateHandler handler) {
+        stateHandlers.put(state, handler);
     }
 
     public void runState() {
         FungalZombieState state = getState();
-        StateRunner runner = stateRunners.get(state);
+        StateHandler.StateRunner runner = stateHandlers.get(state).loopRunner();
         if (runner != null) {
             runner.run(state);
         }
@@ -194,16 +208,31 @@ public abstract class AbstractFungalZombie extends Zombie implements IFungalHaza
         this.entityData.define(STATE, 0);
     }
 
-    public void setState(FungalZombieState state) {
-        this.entityData.set(STATE, state.index());
+    public void setState(FungalZombieState stateNew) {
+//        FungalZombieState stateOld = getState();
+//        switchState(stateOld, stateNew);
+        this.entityData.set(STATE, stateNew.index());
     }
 
     public void setState(int stateIndex) {
-        FungalZombieState state = FungalZombieStates.FUNGAL_ZOMBIE_STATES.get(stateIndex);
-        if (state != null) {
-            setState(state);
+        FungalZombieState stateNew = FungalZombieStates.FUNGAL_ZOMBIE_STATES.get(stateIndex);
+        if (stateNew != null) {
+            setState(stateNew);
         } else {
             setState(defaultStates());
+        }
+    }
+
+    public void switchState(@Nullable FungalZombieState stateOld, @Nonnull FungalZombieState stateNew) {
+        if (!stateNew.equals(stateOld)) {
+            StateHandler handler = stateHandlers.get(stateOld);
+            if (handler != null) {
+                handler.endRunner().run(stateOld);
+            }
+            handler = stateHandlers.get(stateNew);
+            if (handler != null) {
+                handler.startRunner().run(stateNew);
+            }
         }
     }
 
@@ -380,8 +409,5 @@ public abstract class AbstractFungalZombie extends Zombie implements IFungalHaza
         this.patrolling = patrolling;
     }
 
-    @FunctionalInterface
-    public interface StateRunner {
-        void run(FungalZombieState state);
-    }
+
 }

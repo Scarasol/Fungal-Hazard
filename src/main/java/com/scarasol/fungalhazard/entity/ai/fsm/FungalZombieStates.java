@@ -17,21 +17,17 @@ public class FungalZombieStates {
     public static final FungalZombieState RUN = of(true, true, true, true, true, true, true, 1.0);
     public static final FungalZombieState CHASING = of(true, true, true, true, true, true, true, 1.3);
 
-    public static final FungalZombieState START_JUMP = of(false, false, false, true, false, true, false, 0.0);
     public static final FungalZombieState JUMP = of(false, false, false, true, false, true, false, 0.0);
     public static final FungalZombieState JUMPING = of(false, false, false, true, false, true, false, 0.0);
     public static final FungalZombieState EXECUTION = of(false, false, false, false, false, true, false, 0.0);
     public static final FungalZombieState GROUND = of(false, false, false, false, false, true, false, 0.0);
-    public static final FungalZombieState START_RIDING = of(false, false, false, false, false, true, false, 0.0);
     public static final FungalZombieState RIDING = of(false, false, false, false, false, true, false, 0.0);
 
     public static final FungalZombieState DODGE = of(false, false, false, true, true, true, false, 0.0);
 
     public static final FungalZombieState GUARD = of(false, false, true, true, true, true, false, 0.6);
 
-    public static final FungalZombieState START_FALL = of(false, false, false, false, false, false, false, 0.0);
     public static final FungalZombieState FALL = of(false, false, false, false, false, false, false, 0.0);
-    public static final FungalZombieState START_CREEP = of(false, false, false, false, false, false, false, 0.0);
     public static final FungalZombieState CREEP = of(false, true, true, true, false, true, true, 0.7);
 
     public static final FungalZombieState FLEE = of(false, true, true, true, true, false, true, 1.0);

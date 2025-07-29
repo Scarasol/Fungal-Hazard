@@ -6,7 +6,7 @@
 				"identifier": "geometry.volatile",
 				"texture_width": 128,
 				"texture_height": 128,
-				"visible_bounds_width": 3,
+				"visible_bounds_width": 4,
 				"visible_bounds_height": 3.5,
 				"visible_bounds_offset": [0, 1.25, 0]
 			},
@@ -849,11 +849,11 @@
 				{
 					"name": "OffHandItem",
 					"parent": "LeftForeArm",
-					"pivot": [6.5, 14.75, -1.2],
+					"pivot": [6.5, 14.75, -2.2],
 					"rotation": [90, 0, 0],
 					"cubes": [
 						{
-							"origin": [5.5, 13.75, -2.2],
+							"origin": [5.5, 13.75, -3.2],
 							"size": [2, 2, 2],
 							"uv": {
 								"north": {"uv": [0, 0], "uv_size": [2, 2]},
@@ -987,11 +987,11 @@
 				{
 					"name": "MainHandItem",
 					"parent": "RightForeArm",
-					"pivot": [-6.5, 14.75, -1.2],
+					"pivot": [-6.5, 14.75, -2.2],
 					"rotation": [90, 0, 0],
 					"cubes": [
 						{
-							"origin": [-7.5, 13.75, -2.2],
+							"origin": [-7.5, 13.75, -3.2],
 							"size": [2, 2, 2],
 							"uv": {
 								"north": {"uv": [0, 0], "uv_size": [2, 2]},

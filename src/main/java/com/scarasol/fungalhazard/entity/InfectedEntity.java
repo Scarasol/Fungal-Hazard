@@ -3,6 +3,7 @@ package com.scarasol.fungalhazard.entity;
 import com.scarasol.fungalhazard.configuration.CommonConfig;
 import com.scarasol.fungalhazard.entity.ai.fsm.FungalZombieState;
 import com.scarasol.fungalhazard.entity.ai.fsm.FungalZombieStates;
+import com.scarasol.fungalhazard.entity.ai.fsm.StateHandler;
 import com.scarasol.fungalhazard.init.FungalHazardEntities;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -115,9 +116,9 @@ public class InfectedEntity extends AbstractMutilatableZombie {
     @Override
     public void registerStateRunner() {
         super.registerStateRunner();
-        putStateRunner(FungalZombieStates.RUN, this::defaultState);
-        putStateRunner(FungalZombieStates.CHASING, this::defaultState);
-        putStateRunner(FungalZombieStates.IDLE, this::defaultState);
+        putStateRunner(FungalZombieStates.RUN, new StateHandler(StateHandler.EMPTY_RUNNER, this::defaultState,StateHandler.EMPTY_RUNNER));
+        putStateRunner(FungalZombieStates.CHASING, new StateHandler(StateHandler.EMPTY_RUNNER, this::defaultState,StateHandler.EMPTY_RUNNER));
+        putStateRunner(FungalZombieStates.IDLE, new StateHandler(StateHandler.EMPTY_RUNNER, this::defaultState,StateHandler.EMPTY_RUNNER));
     }
 
     private void defaultState(FungalZombieState state) {
