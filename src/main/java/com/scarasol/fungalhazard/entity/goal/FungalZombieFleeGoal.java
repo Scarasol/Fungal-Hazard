@@ -1,8 +1,9 @@
 package com.scarasol.fungalhazard.entity.goal;
 
-import com.scarasol.fungalhazard.entity.AbstractFungalZombie;
+import com.scarasol.fungalhazard.api.IFungalZombie;
 import com.scarasol.fungalhazard.entity.ai.fsm.FungalZombieStates;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.util.LandRandomPos;
 import net.minecraft.world.level.Level;
@@ -14,8 +15,8 @@ import java.util.EnumSet;
 /**
  * @author Scarasol
  */
-public class FungalZombieFleeGoal extends Goal {
-    private final AbstractFungalZombie mob;
+public class FungalZombieFleeGoal<T extends PathfinderMob & IFungalZombie> extends Goal {
+    private final T mob;
     private double wantedX;
     private double wantedY;
     private double wantedZ;
@@ -23,7 +24,7 @@ public class FungalZombieFleeGoal extends Goal {
     @Nullable
     private Vec3 lastFleePos;
 
-    public FungalZombieFleeGoal(AbstractFungalZombie mob) {
+    public FungalZombieFleeGoal(T mob) {
         this.mob = mob;
         this.level = mob.level();
         this.setFlags(EnumSet.of(Goal.Flag.MOVE));

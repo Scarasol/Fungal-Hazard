@@ -1,6 +1,6 @@
 package com.scarasol.fungalhazard.mixin;
 
-import com.scarasol.fungalhazard.entity.AbstractFungalZombie;
+import com.scarasol.fungalhazard.api.IFungalZombie;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
@@ -27,7 +27,7 @@ public abstract class NearestAttackableTargetGoalMixin extends TargetGoal {
 
     @Inject(method = "canUse", cancellable = true, at = @At("RETURN"))
     private void fungalHazard$CanUse(CallbackInfoReturnable<Boolean> cir) {
-        if (this.target != null && this.mob instanceof AbstractFungalZombie abstractFungalZombie && !abstractFungalZombie.testAttackable(this.target)) {
+        if (this.target != null && this.mob instanceof IFungalZombie fungalZombie && !fungalZombie.testAttackable(this.target)) {
             cir.setReturnValue(false);
             this.target = null;
         }

@@ -1,35 +1,31 @@
 package com.scarasol.fungalhazard.entity.ai;
 
 import com.google.common.collect.Lists;
-import com.scarasol.fungalhazard.FungalHazardMod;
-import com.scarasol.fungalhazard.entity.AbstractFungalZombie;
-import com.scarasol.fungalhazard.entity.ai.fsm.FungalZombieStates;
+import com.scarasol.fungalhazard.api.IFungalZombie;
+import com.scarasol.fungalhazard.api.IPatrolMob;
 import com.scarasol.sona.util.SonaMath;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
-import net.minecraft.tags.BlockTags;
-import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.Node;
 import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.Random;
 
-public class FungalZombieGroundPathNavigation extends GroundPathNavigation {
+public class FungalZombieGroundPathNavigation<T extends Mob & IPatrolMob & IFungalZombie> extends GroundPathNavigation {
 
-    private final AbstractFungalZombie zombie;
+    private final T zombie;
     private long lastJumpTime;
     private boolean isStuck;
     private boolean stuckJumpTried;
     private boolean timeoutJumpTried;
 
-    public FungalZombieGroundPathNavigation(AbstractFungalZombie mob, Level level) {
+    public FungalZombieGroundPathNavigation(T mob, Level level) {
         super(mob, level);
         this.zombie = mob;
     }
@@ -39,12 +35,12 @@ public class FungalZombieGroundPathNavigation extends GroundPathNavigation {
         if (!zombie.getState().canMove()) {
             return null;
         }
-        AbstractFungalZombie leader = zombie.getLeader();
-        if (!zombie.isPatrolLeader() && zombie.isPatrolling() && leader != null) {
-            Path path = leader.getNavigation().getPath();
+        LivingEntity leader = zombie.getLeader();
+        if (!zombie.isPatrolLeader() && zombie.isPatrolling() && leader instanceof Mob mob && mob instanceof IPatrolMob patrolMob) {
+            Path path = mob.getNavigation().getPath();
             if (path != null) {
-                if (leader.distanceToSqr(zombie) < 64 && leader.hasPatrolTarget()) {
-                    Vec3 distance = leader.getPatrolTarget().getCenter().subtract(leader.position());
+                if (leader.distanceToSqr(zombie) < 64 && patrolMob.hasPatrolTarget()) {
+                    Vec3 distance = patrolMob.getPatrolTarget().getCenter().subtract(leader.position());
                     Vec3 angle = this.zombie.position().subtract(leader.position());
                     if (SonaMath.vectorDegreeCalculate(distance, angle) > 45) {
                         return getLeadersPath();
@@ -62,7 +58,45 @@ public class FungalZombieGroundPathNavigation extends GroundPathNavigation {
     public void tick() {
         setSpeedModifier(zombie.getState().speedModifier());
         super.tick();
+//        if (zombie.isPatrolling() && !zombie.isPatrolLeader() && (level.getGameTime() + zombie.getId()) % 20 == 0) {
+//            applySeparationForce();
+//        }
     }
+
+//    /**
+//     * 简化版鸟群分离规则
+//     * 避免多个僵尸走在完全相同的路径点上
+//     */
+//    private void applySeparationForce() {
+//        double separationRadius = zombie.getBbWidth() / 1.414;  // 分离半径（方块）
+//        double separationStrength = 0.05; // 分离强度，越大避让越快
+//
+//        Vec3 myPos = zombie.position();
+//        Vec3 offset = Vec3.ZERO;
+//
+//        // 搜索半径内的实体
+//        List<AbstractHumanoidFungalZombie> nearby = zombie.level().getEntitiesOfClass(
+//                AbstractHumanoidFungalZombie.class,
+//                zombie.getBoundingBox().inflate(separationRadius),
+//                e -> e != zombie && e.isAlive() && e.isPatrolling()
+//        );
+//
+//        for (AbstractHumanoidFungalZombie other : nearby) {
+//            Vec3 diff = myPos.subtract(other.position());
+//            double distSqr = diff.lengthSqr();
+//            if (distSqr < 0.0001) {
+//                continue; // 避免除零
+//            }
+//            double weight = 1.0 / distSqr;  // 距离越近，推力越大
+//            offset = offset.add(diff.normalize().scale(weight));
+//        }
+//
+//        if (!offset.equals(Vec3.ZERO)) {
+//            Vec3 oldDelta = zombie.getDeltaMovement();
+//            Vec3 newDelta = oldDelta.add(offset.normalize().scale(separationStrength));
+//            zombie.setDeltaMovement(newDelta);
+//        }
+//    }
 
     @Override
     protected void followThePath() {
@@ -199,9 +233,9 @@ public class FungalZombieGroundPathNavigation extends GroundPathNavigation {
 
     @Nullable
     public Path getLeadersPath() {
-        AbstractFungalZombie leader = this.zombie.getLeader();
-        if (leader != null && !this.zombie.isPatrolLeader()) {
-            return pathCopy(leader.getNavigation().getPath());
+        LivingEntity leader = this.zombie.getLeader();
+        if (leader != null && !this.zombie.isPatrolLeader() && leader instanceof Mob mob) {
+            return pathCopy(mob.getNavigation().getPath());
         }
         return null;
     }

@@ -1,5 +1,6 @@
-package com.scarasol.fungalhazard.entity;
+package com.scarasol.fungalhazard.entity.humanoid;
 
+import com.scarasol.fungalhazard.api.IFungalZombie;
 import com.scarasol.fungalhazard.configuration.CommonConfig;
 import com.scarasol.fungalhazard.entity.ai.fsm.FungalZombieState;
 import com.scarasol.fungalhazard.entity.ai.fsm.FungalZombieStates;
@@ -11,7 +12,6 @@ import com.scarasol.sona.init.SonaMobEffects;
 import com.scarasol.sona.manager.InfectionManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
@@ -21,11 +21,9 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.network.PlayMessages;
 import software.bernie.geckolib.core.animation.AnimationController;
@@ -56,7 +54,8 @@ public class SporerEntity extends AbstractMutilatableZombie {
         putStateRunner(FungalZombieStates.IDLE, new StateHandler(StateHandler.EMPTY_RUNNER, this::defaultState,StateHandler.EMPTY_RUNNER));
     }
 
-    private void defaultState(FungalZombieState state) {
+    @Override
+    public void defaultState(FungalZombieState state) {
         if (!level().isClientSide()) {
             setState(defaultStates());
         }
@@ -132,18 +131,8 @@ public class SporerEntity extends AbstractMutilatableZombie {
     }
 
     @Override
-    public double getAttackRangeModifier() {
-        return 1;
-    }
-
-    @Override
     public int getAttackCoolDown() {
         return 30;
-    }
-
-    @Override
-    public boolean testAttackable(LivingEntity livingEntity) {
-        return true;
     }
 
     @Override
@@ -216,7 +205,7 @@ public class SporerEntity extends AbstractMutilatableZombie {
     }
 
     @Override
-    public void animationSwitch(AnimationState<AbstractMutilatableZombie> event, AnimationController<AbstractMutilatableZombie> controller, RawAnimation idle, RawAnimation move) {
+    public <T extends IFungalZombie> void animationSwitch(AnimationState<T> event, AnimationController<T> controller, RawAnimation idle, RawAnimation move) {
         if (event.isMoving() || !(event.getLimbSwingAmount() > -0.15F && event.getLimbSwingAmount() < 0.15F)) {
             if ((!controller.isPlayingTriggeredAnimation())) {
                 if (event.isCurrentAnimation(idle) || controller.getCurrentRawAnimation() == null || event.getController().hasAnimationFinished()) {

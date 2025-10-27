@@ -1,16 +1,17 @@
 package com.scarasol.fungalhazard.entity.goal;
 
-import com.scarasol.fungalhazard.entity.AbstractFungalZombie;
+import com.scarasol.fungalhazard.api.IFungalZombie;
+import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
 
 /**
  * @author Scarasol
  */
-public class FungalZombieFloatGoal extends FloatGoal {
+public class FungalZombieFloatGoal<T extends PathfinderMob & IFungalZombie> extends FloatGoal {
 
-    private final AbstractFungalZombie zombie;
+    private final T zombie;
 
-    public FungalZombieFloatGoal(AbstractFungalZombie mob) {
+    public FungalZombieFloatGoal(T mob) {
         super(mob);
         this.zombie = mob;
     }

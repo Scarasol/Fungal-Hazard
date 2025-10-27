@@ -1,21 +1,23 @@
 package com.scarasol.fungalhazard.entity.goal;
 
-import com.scarasol.fungalhazard.entity.AbstractFungalZombie;
+import com.scarasol.fungalhazard.api.IFungalZombie;
+import com.scarasol.fungalhazard.api.IPatrolMob;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
 
 /**
  * @author Scarasol
  */
-public class FungalZombieAttackGoal extends MeleeAttackGoal {
+public class FungalZombieAttackGoal<T extends PathfinderMob & IFungalZombie> extends MeleeAttackGoal {
 
-    private final AbstractFungalZombie zombie;
+    private final T zombie;
     private int currentAnimationTick;
     private boolean startAttack;
     private long lastAttackTime;
 
 
-    public FungalZombieAttackGoal(AbstractFungalZombie zombie, double speedModifier, boolean followingTargetEvenIfNotSeen) {
+    public FungalZombieAttackGoal(T zombie, double speedModifier, boolean followingTargetEvenIfNotSeen) {
         super(zombie, speedModifier, followingTargetEvenIfNotSeen);
         this.zombie = zombie;
     }
@@ -27,7 +29,7 @@ public class FungalZombieAttackGoal extends MeleeAttackGoal {
 
     @Override
     public boolean canContinueToUse() {
-        return  (this.mob.isAlive() && startAttack && this.mob.getTarget() != null && zombie.getState().canAttack()) || super.canContinueToUse();
+        return (this.mob.isAlive() && startAttack && this.mob.getTarget() != null && zombie.getState().canAttack()) || super.canContinueToUse();
     }
 
     @Override

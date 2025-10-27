@@ -1,7 +1,6 @@
 package com.scarasol.fungalhazard.mixin;
 
-import com.scarasol.fungalhazard.entity.AbstractFungalZombie;
-import net.minecraft.client.Minecraft;
+import com.scarasol.fungalhazard.api.IFungalZombie;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.network.protocol.game.ClientboundSetPassengersPacket;
@@ -23,7 +22,7 @@ public abstract class ClientPacketListenerMixin {
     @Inject(method = "handleSetEntityPassengersPacket", cancellable = true, at = @At(value = "INVOKE", target = "Lnet/minecraft/network/chat/Component;translatable(Ljava/lang/String;[Ljava/lang/Object;)Lnet/minecraft/network/chat/MutableComponent;"))
     private void fungalHazard$HandleSetEntityPassengersPacket(ClientboundSetPassengersPacket packet, CallbackInfo ci) {
         Entity entity = this.level.getEntity(packet.getVehicle());
-        if (entity instanceof AbstractFungalZombie) {
+        if (entity instanceof IFungalZombie) {
             ci.cancel();
         }
     }

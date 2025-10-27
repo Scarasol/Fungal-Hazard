@@ -1,4 +1,4 @@
-package com.scarasol.fungalhazard.entity;
+package com.scarasol.fungalhazard.entity.humanoid;
 
 import com.scarasol.fungalhazard.configuration.CommonConfig;
 import com.scarasol.fungalhazard.entity.ai.fsm.FungalZombieState;
@@ -121,7 +121,8 @@ public class InfectedEntity extends AbstractMutilatableZombie {
         putStateRunner(FungalZombieStates.IDLE, new StateHandler(StateHandler.EMPTY_RUNNER, this::defaultState,StateHandler.EMPTY_RUNNER));
     }
 
-    private void defaultState(FungalZombieState state) {
+    @Override
+    public void defaultState(FungalZombieState state) {
         if (!level().isClientSide()) {
             setState(defaultStates());
         }
@@ -141,16 +142,6 @@ public class InfectedEntity extends AbstractMutilatableZombie {
     @Override
     public String getAnimation() {
         return "animations/infected.animation.json";
-    }
-
-    @Override
-    public boolean testAttackable(LivingEntity livingEntity) {
-        return true;
-    }
-
-    @Override
-    public double getAttackRangeModifier() {
-        return 1;
     }
 
     @Override

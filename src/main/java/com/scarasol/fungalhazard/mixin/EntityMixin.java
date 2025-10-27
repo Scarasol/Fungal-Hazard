@@ -1,15 +1,13 @@
 package com.scarasol.fungalhazard.mixin;
 
-import com.scarasol.fungalhazard.entity.AbstractFungalZombie;
+import com.scarasol.fungalhazard.api.IFungalZombie;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.player.Player;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import javax.annotation.Nullable;
 
@@ -33,8 +31,9 @@ public abstract class EntityMixin {
 
     @Inject(method = "setYRot", cancellable = true, at = @At("HEAD"))
     private void fungalHazard$SetYRot(float yRot, CallbackInfo ci) {
-        if (getVehicle() instanceof AbstractFungalZombie abstractFungalZombie && !((Entity) ((Object)this) instanceof AbstractFungalZombie)) {
-            this.yRot = Mth.wrapDegrees(abstractFungalZombie.getYRot() + 180);
+        Entity entity = getVehicle();
+        if (entity instanceof IFungalZombie && !(this instanceof IFungalZombie)) {
+            this.yRot = Mth.wrapDegrees(entity.getYRot() + 180);
             ci.cancel();
         }
     }

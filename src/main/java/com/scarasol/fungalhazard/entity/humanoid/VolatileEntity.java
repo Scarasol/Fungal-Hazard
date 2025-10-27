@@ -1,6 +1,7 @@
-package com.scarasol.fungalhazard.entity;
+package com.scarasol.fungalhazard.entity.humanoid;
 
 import com.scarasol.fungalhazard.api.IDodgeableZombie;
+import com.scarasol.fungalhazard.api.IFungalZombie;
 import com.scarasol.fungalhazard.api.IGuardableZombie;
 import com.scarasol.fungalhazard.api.IJumpZombie;
 import com.scarasol.fungalhazard.configuration.CommonConfig;
@@ -31,7 +32,6 @@ import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.AxeItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.TieredItem;
@@ -59,7 +59,7 @@ import java.util.Random;
 /**
  * @author Scarasol
  */
-public class VolatileEntity extends AbstractFungalZombie implements IDodgeableZombie, IGuardableZombie, IJumpZombie {
+public class VolatileEntity extends AbstractHumanoidFungalZombie implements IDodgeableZombie, IGuardableZombie, IJumpZombie {
 
     private static final RawAnimation IDLE = RawAnimation.begin().thenLoop("idle");
     private static final RawAnimation DEATH = RawAnimation.begin().thenPlayAndHold("death");
@@ -192,7 +192,7 @@ public class VolatileEntity extends AbstractFungalZombie implements IDodgeableZo
             return false;
         }
         LivingEntity target = this.getTarget();
-        if (target == null || target instanceof SoundDecoy || !target.isAlive() || target.getVehicle() instanceof AbstractFungalZombie) {
+        if (target == null || target instanceof SoundDecoy || !target.isAlive() || target.getVehicle() instanceof IFungalZombie) {
             return false;
         }
         if (Math.abs(target.getY() - getY()) > 6) {
@@ -474,7 +474,7 @@ public class VolatileEntity extends AbstractFungalZombie implements IDodgeableZo
 
     @Override
     public void push(Entity target) {
-        if (getState().equals(FungalZombieStates.JUMPING) && target.equals(getTarget()) && target instanceof LivingEntity livingEntity && !(target.getVehicle() instanceof AbstractFungalZombie)) {
+        if (getState().equals(FungalZombieStates.JUMPING) && target.equals(getTarget()) && target instanceof LivingEntity livingEntity && !(target.getVehicle() instanceof IFungalZombie)) {
             if (livingEntity.getUseItem().is(Items.SHIELD)) {
                 level().playSound(null, this, SoundEvents.SHIELD_BLOCK, SoundSource.PLAYERS, 1, 1);
                 livingEntity.stopUsingItem();
@@ -490,7 +490,6 @@ public class VolatileEntity extends AbstractFungalZombie implements IDodgeableZo
                 livingEntity.stopUsingItem();
                 if (!(livingEntity instanceof Player)) {
                     livingEntity.addEffect(new MobEffectInstance(SonaMobEffects.STUN.get(), 30, 0, true, false));
-                    livingEntity.addEffect(new MobEffectInstance(SonaMobEffects.CONFUSION.get(), 30, 0, true, false));
                     livingEntity.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, CommonConfig.VOLATILE_EXECUTION_TIME.get() * 20, 1, true, false));
                     if (livingEntity instanceof Mob mob) {
                         mob.setTarget(null);
@@ -513,12 +512,13 @@ public class VolatileEntity extends AbstractFungalZombie implements IDodgeableZo
             Level level = level();
             double damage = this.getAttributeValue(Attributes.ATTACK_DAMAGE);
             damage += EnchantmentHelper.getDamageBonus(this.getMainHandItem(), livingEntity.getMobType());
-            if (level.random.nextDouble() < (-9 + damage) / 8 && livingEntity.getUseItem().is(Items.SHIELD)) {
+            ItemStack itemStack = livingEntity.getUseItem();
+            if (level.random.nextDouble() < (-9 + damage) / 8 && itemStack.is(FungalHazardTags.SHIELD)) {
                 level.playSound(null, livingEntity, SoundEvents.SHIELD_BLOCK, SoundSource.PLAYERS, 1, 1);
                 livingEntity.stopUsingItem();
                 if (livingEntity instanceof Player player) {
-                    player.getCooldowns().addCooldown(Items.SHIELD, 100);
-                    this.level().broadcastEntityEvent(player, (byte)30);
+                    player.getCooldowns().addCooldown(itemStack.getItem(), 100);
+                    this.level().broadcastEntityEvent(player, (byte) 30);
                 }
             }
         }
@@ -628,18 +628,19 @@ public class VolatileEntity extends AbstractFungalZombie implements IDodgeableZo
     }
 
     public void startExecutionState(FungalZombieState state) {
-        if (!CommonConfig.VOLATILE_FLEE_IN_SUN.get() || !(level().isDay() && level().canSeeSky(blockPosition()) && !level().isRainingAt(blockPosition()))) {
-            setAnimationTick(43);
-            playSound(FungalHazardSounds.VOLATILE_EXECUTION.get());
-        } else {
-            Entity entity = getFirstPassenger();
-            if (entity != null) {
-                entity.stopRiding();
+        if (!level().isClientSide()) {
+            if (!CommonConfig.VOLATILE_FLEE_IN_SUN.get() || !(level().isDay() && level().canSeeSky(blockPosition()) && !level().isRainingAt(blockPosition()))) {
+                setAnimationTick(43);
+                playSound(FungalHazardSounds.VOLATILE_EXECUTION.get());
+            } else {
+                Entity entity = getFirstPassenger();
+                if (entity != null) {
+                    entity.stopRiding();
+                }
+                setState(FungalZombieStates.GROUND);
+                executionGroundAnimation();
             }
-            setState(FungalZombieStates.GROUND);
-            executionGroundAnimation();
         }
-
     }
 
     public void executionState(FungalZombieState state) {
@@ -662,7 +663,7 @@ public class VolatileEntity extends AbstractFungalZombie implements IDodgeableZo
     }
 
     public void hangState(FungalZombieState state) {
-        if (!level().isClientSide() && onGround()) {
+        if (!level().isClientSide() && (onGround() || isInFluidType())) {
             if (!stagger) {
                 groundAnimation();
             } else {
@@ -689,6 +690,7 @@ public class VolatileEntity extends AbstractFungalZombie implements IDodgeableZo
         }
     }
 
+    @Override
     public void defaultState(FungalZombieState state) {
         if (!level().isClientSide()) {
             if (CommonConfig.VOLATILE_FLEE_IN_SUN.get() && level().isDay() && level().canSeeSky(blockPosition()) && !level().isRainingAt(blockPosition())) {
@@ -716,7 +718,6 @@ public class VolatileEntity extends AbstractFungalZombie implements IDodgeableZo
         Entity entity = getFirstPassenger();
         if (entity != null) {
             if (!CommonConfig.VOLATILE_FLEE_IN_SUN.get() || !(level().isDay() && level().canSeeSky(blockPosition()) && !level().isRainingAt(blockPosition()))) {
-                refreshDimensions();
                 playSound(FungalHazardSounds.VOLATILE_RIDING.get());
                 if (entity instanceof Player player) {
                     player.setXRot(-30);
@@ -726,9 +727,10 @@ public class VolatileEntity extends AbstractFungalZombie implements IDodgeableZo
             }
         }
         executionGroundAnimation();
-        setState(FungalZombieStates.GROUND);
-
-
+        if (!level().isClientSide()) {
+            setState(FungalZombieStates.GROUND);
+        }
+        refreshDimensions();
     }
 
     public void jumpState(FungalZombieState state) {
@@ -828,7 +830,7 @@ public class VolatileEntity extends AbstractFungalZombie implements IDodgeableZo
     @Override
     protected void addBehaviourGoals() {
         super.addBehaviourGoals();
-        this.goalSelector.addGoal(0, new FungalZombieFleeGoal(this));
+        this.goalSelector.addGoal(0, new FungalZombieFleeGoal<>(this));
         this.goalSelector.addGoal(2, new FungalZombieGuardGoal<>(this));
         this.goalSelector.addGoal(1, new FungalZombieJumpGoal<>(this));
         this.goalSelector.addGoal(1, new FungalZombieDodgeGoal<>(this));
@@ -975,10 +977,13 @@ public class VolatileEntity extends AbstractFungalZombie implements IDodgeableZo
 
     private PlayState executionAnimationController(AnimationState<VolatileEntity> event) {
         AnimationController<VolatileEntity> controller = event.getController();
+
         if (isAlive() && !getPassengers().isEmpty()) {
             if (!controller.isPlayingTriggeredAnimation()) {
                 if (getState().equals(FungalZombieStates.RIDING)) {
+
                     if (event.isCurrentAnimation(EXECUTION) || controller.getCurrentRawAnimation() == null || event.getController().hasAnimationFinished()) {
+
                         event.setAndContinue(RIDING);
                     }
                 } else if (getState().equals(FungalZombieStates.EXECUTION)) {
@@ -992,7 +997,7 @@ public class VolatileEntity extends AbstractFungalZombie implements IDodgeableZo
         return PlayState.STOP;
     }
 
-    private PlayState animationController(AnimationState<VolatileEntity> event) {
+    public PlayState animationController(AnimationState<VolatileEntity> event) {
         AnimationController<VolatileEntity> controller = event.getController();
         if (isAlive() && getPassengers().isEmpty() && !getState().equals(FungalZombieStates.GUARD)) {
             if (isDefaultState()) {

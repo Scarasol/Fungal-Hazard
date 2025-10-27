@@ -1,15 +1,16 @@
 package com.scarasol.fungalhazard.entity.goal;
 
+import com.scarasol.fungalhazard.api.IFungalZombie;
 import com.scarasol.fungalhazard.api.IJumpZombie;
-import com.scarasol.fungalhazard.entity.AbstractFungalZombie;
 import com.scarasol.fungalhazard.entity.ai.fsm.FungalZombieStates;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.goal.JumpGoal;
 
 /**
  * @author Scarasol
  */
-public class FungalZombieJumpGoal<T extends AbstractFungalZombie & IJumpZombie> extends JumpGoal {
+public class FungalZombieJumpGoal<T extends Mob & IFungalZombie & IJumpZombie> extends JumpGoal {
 
     private final T zombie;
 

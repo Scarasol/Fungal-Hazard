@@ -1,19 +1,14 @@
 package com.scarasol.fungalhazard.entity.goal;
 
-import com.scarasol.fungalhazard.FungalHazardMod;
 import com.scarasol.fungalhazard.api.IDodgeableZombie;
-import com.scarasol.fungalhazard.entity.AbstractFungalZombie;
-import com.scarasol.sona.util.SonaMath;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.LivingEntity;
+import com.scarasol.fungalhazard.api.IFungalZombie;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.goal.Goal;
-import net.minecraft.world.item.TieredItem;
-import net.minecraftforge.registries.ForgeRegistries;
 
 /**
  * @author Scarasol
  */
-public class FungalZombieDodgeGoal<T extends AbstractFungalZombie & IDodgeableZombie> extends Goal {
+public class FungalZombieDodgeGoal<T extends Mob & IFungalZombie & IDodgeableZombie> extends Goal {
     private final T zombie;
 
 

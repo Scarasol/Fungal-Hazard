@@ -5,6 +5,7 @@ package com.scarasol.fungalhazard.entity.ai.fsm;
  */
 public class FungalZombieState {
     private final int index;
+    private final String name;
     private final boolean canPatrol;
     private final boolean canAttack;
     private final boolean canMove;
@@ -16,8 +17,9 @@ public class FungalZombieState {
 
 
 
-    FungalZombieState(int index, boolean canPatrol, boolean canAttack, boolean canMove, boolean canRot, boolean canControlHead, boolean canTarget, boolean isDefault, double speedModifier) {
+    FungalZombieState(int index, String name, boolean canPatrol, boolean canAttack, boolean canMove, boolean canRot, boolean canControlHead, boolean canTarget, boolean isDefault, double speedModifier) {
         this.index = index;
+        this.name = name;
         this.canPatrol = canPatrol;
         this.canAttack = canAttack;
         this.canMove = canMove;
@@ -62,5 +64,10 @@ public class FungalZombieState {
 
     public double speedModifier() {
         return speedModifier;
+    }
+
+    @Override
+    public String toString() {
+        return name;
     }
 }

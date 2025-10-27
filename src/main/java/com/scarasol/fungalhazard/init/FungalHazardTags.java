@@ -11,6 +11,7 @@ import net.minecraft.world.level.biome.Biome;
  */
 public class FungalHazardTags {
     public static TagKey<Item> GUN = TagKey.create(Registries.ITEM, new ResourceLocation("forge:gun"));
+    public static TagKey<Item> SHIELD = TagKey.create(Registries.ITEM, new ResourceLocation("forge:shield"));
     public static TagKey<Item> MELEE_WEAPON = TagKey.create(Registries.ITEM, new ResourceLocation("forge:melee_weapon"));
 
 

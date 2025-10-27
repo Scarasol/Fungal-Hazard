@@ -191,13 +191,14 @@ dependencies {
     implementation(jarJar("io.github.llamalad7:mixinextras-forge:0.3.6")) {
         jarJar.ranged(it, "[0.3.6,)")
     }
-    implementation fg.deobf("curse.maven:sona-survival-101-1023345:6730236")
-    implementation fg.deobf("curse.maven:zombie-survival-kit-839371:6600944")
+    implementation fg.deobf("curse.maven:sona-survival-101-1023345:7150785")
+    implementation fg.deobf("curse.maven:zombie-survival-kit-839371:7099895")
     implementation fg.deobf("curse.maven:timeless-and-classics-zero-1028108:6518539")
 
 
     implementation fg.deobf("curse.maven:curios-309927:6418456")
-    implementation fg.deobf("curse.maven:superb-warfare-1218165:6633653")
+    implementation fg.deobf("curse.maven:superb-warfare-1218165:6982132")
+//    implementation fg.deobf("curse.maven:nyfs-spiders-686058:4728359")
 
     // Example mod dependency with JEI - using fg.deobf() ensures the dependency is remapped to your development mappings
     // The JEI API is declared for compile time use, while the full JEI artifact is used at runtime

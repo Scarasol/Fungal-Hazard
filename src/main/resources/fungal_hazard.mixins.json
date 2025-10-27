@@ -8,8 +8,11 @@
   },
   "minVersion": "0.8",
   "mixins": [
+    "BaseContainerBlockEntityMixin",
     "EntityMixin",
-    "NearestAttackableTargetGoalMixin"
+    "NearestAttackableTargetGoalMixin",
+    "PlayerMixin",
+    "SpiderMixin"
   ],
   "client": [
     "ClientPacketListenerMixin",

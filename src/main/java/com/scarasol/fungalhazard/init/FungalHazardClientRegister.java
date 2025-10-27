@@ -1,7 +1,9 @@
 package com.scarasol.fungalhazard.init;
 
 import com.scarasol.fungalhazard.client.particle.SporeParticle;
+import com.scarasol.fungalhazard.client.renderer.ArachnidFungalZombieEntityRenderer;
 import com.scarasol.fungalhazard.client.renderer.FungalZombieEntityRenderer;
+import com.scarasol.fungalhazard.client.renderer.HumanoidFungalZombieEntityRenderer;
 import com.scarasol.fungalhazard.client.renderer.MutilatableZombieEntityRenderer;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.EntityRenderersEvent;
@@ -18,7 +20,8 @@ public class FungalHazardClientRegister {
     public static void registerEntityRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerEntityRenderer(FungalHazardEntities.INFECTED.get(), renderManager -> new MutilatableZombieEntityRenderer<>(renderManager, true));
         event.registerEntityRenderer(FungalHazardEntities.SPORER.get(), renderManager -> new MutilatableZombieEntityRenderer<>(renderManager, false));
-        event.registerEntityRenderer(FungalHazardEntities.VOLATILE.get(), renderManager -> new FungalZombieEntityRenderer<>(renderManager, true));
+        event.registerEntityRenderer(FungalHazardEntities.VOLATILE.get(), renderManager -> new HumanoidFungalZombieEntityRenderer<>(renderManager, true));
+        event.registerEntityRenderer(FungalHazardEntities.LURKER.get(), renderManager -> new ArachnidFungalZombieEntityRenderer<>(renderManager, false));
     }
 
     @SubscribeEvent

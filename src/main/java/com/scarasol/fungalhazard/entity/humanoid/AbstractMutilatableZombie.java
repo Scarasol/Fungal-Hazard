@@ -1,6 +1,5 @@
-package com.scarasol.fungalhazard.entity;
+package com.scarasol.fungalhazard.entity.humanoid;
 
-import com.scarasol.fungalhazard.FungalHazardMod;
 import com.scarasol.fungalhazard.configuration.CommonConfig;
 import com.scarasol.fungalhazard.entity.ai.fsm.FungalZombieState;
 import com.scarasol.fungalhazard.entity.ai.fsm.FungalZombieStates;
@@ -37,7 +36,7 @@ import java.util.UUID;
 /**
  * @author Scarasol
  */
-public abstract class AbstractMutilatableZombie extends AbstractFungalZombie{
+public abstract class AbstractMutilatableZombie extends AbstractHumanoidFungalZombie {
 
     protected static final RawAnimation IDLE = RawAnimation.begin().thenLoop("idle");
     protected static final RawAnimation DEATH = RawAnimation.begin().thenPlayAndHold("death");
@@ -269,8 +268,8 @@ public abstract class AbstractMutilatableZombie extends AbstractFungalZombie{
     public abstract boolean isMutilation();
 
     @Override
-    public boolean canJoinPatrol() {
-        return !isMutilation() && super.canJoinPatrol();
+    public boolean canJoinPatrolNow() {
+        return !isMutilation() && super.canJoinPatrolNow();
     }
 
     public PlayState animationController(AnimationState<AbstractMutilatableZombie> event) {
@@ -291,21 +290,6 @@ public abstract class AbstractMutilatableZombie extends AbstractFungalZombie{
         return PlayState.STOP;
     }
 
-    public void animationSwitch(AnimationState<AbstractMutilatableZombie> event, AnimationController<AbstractMutilatableZombie> controller, RawAnimation idle, RawAnimation move) {
-        if (event.isMoving() || !(event.getLimbSwingAmount() > -0.15F && event.getLimbSwingAmount() < 0.15F)) {
-            if ((!controller.isPlayingTriggeredAnimation())) {
-                if (event.isCurrentAnimation(idle) || controller.getCurrentRawAnimation() == null || event.getController().hasAnimationFinished()) {
-                    event.setAndContinue(move);
-                }
-            }
-        } else {
-            if (!controller.isPlayingTriggeredAnimation()) {
-                if (event.isCurrentAnimation(move) || controller.getCurrentRawAnimation() == null || event.getController().hasAnimationFinished()) {
-                    event.setAndContinue(idle);
-                }
-            }
-        }
-    }
 
     public PlayState deathAnimationController(AnimationState<AbstractMutilatableZombie> event) {
         if (!isAlive()) {

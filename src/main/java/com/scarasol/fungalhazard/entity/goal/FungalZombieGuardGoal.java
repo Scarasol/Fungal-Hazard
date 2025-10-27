@@ -1,15 +1,16 @@
 package com.scarasol.fungalhazard.entity.goal;
 
+import com.scarasol.fungalhazard.api.IFungalZombie;
 import com.scarasol.fungalhazard.api.IGuardableZombie;
-import com.scarasol.fungalhazard.entity.AbstractFungalZombie;
 import com.scarasol.fungalhazard.entity.ai.fsm.FungalZombieStates;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.goal.Goal;
 
 /**
  * @author Scarasol
  */
-public class FungalZombieGuardGoal<T extends AbstractFungalZombie & IGuardableZombie> extends Goal {
+public class FungalZombieGuardGoal<T extends Mob & IFungalZombie & IGuardableZombie> extends Goal {
 
     private final T zombie;
     private int times;
@@ -60,7 +61,7 @@ public class FungalZombieGuardGoal<T extends AbstractFungalZombie & IGuardableZo
 
     }
 
-    public static double getTargetAttackReachSqr(AbstractFungalZombie zombie, LivingEntity target) {
+    public static double getTargetAttackReachSqr(Mob zombie, LivingEntity target) {
         return target.getBbWidth() * 2 * target.getBbWidth() * 2 * 1.44 + zombie.getBbWidth();
     }
 

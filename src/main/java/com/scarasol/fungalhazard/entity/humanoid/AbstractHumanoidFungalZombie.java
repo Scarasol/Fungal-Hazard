@@ -1,8 +1,8 @@
-package com.scarasol.fungalhazard.entity;
+package com.scarasol.fungalhazard.entity.humanoid;
 
 import com.google.common.collect.Maps;
-import com.scarasol.fungalhazard.FungalHazardMod;
-import com.scarasol.fungalhazard.api.IFungalHazardGeoEntity;
+import com.scarasol.fungalhazard.api.IFungalZombie;
+import com.scarasol.fungalhazard.api.IPatrolMob;
 import com.scarasol.fungalhazard.configuration.CommonConfig;
 import com.scarasol.fungalhazard.entity.ai.FungalZombieGroundPathNavigation;
 import com.scarasol.fungalhazard.entity.ai.fsm.FungalZombieState;
@@ -12,7 +12,6 @@ import com.scarasol.fungalhazard.entity.goal.*;
 import com.scarasol.fungalhazard.init.FungalHazardTags;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -35,29 +34,30 @@ import net.minecraft.world.entity.monster.ZombifiedPiglin;
 import net.minecraft.world.entity.npc.AbstractVillager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraftforge.network.NetworkHooks;
+import org.jetbrains.annotations.NotNull;
 import software.bernie.geckolib.animatable.SingletonGeoAnimatable;
 import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.util.GeckoLibUtil;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Map;
-import java.util.UUID;
+
+import static com.scarasol.fungalhazard.init.FungalHazardEntities.*;
 
 /**
  * @author Scarasol
  */
-public abstract class AbstractFungalZombie extends Zombie implements IFungalHazardGeoEntity {
+public abstract class AbstractHumanoidFungalZombie extends Zombie implements IFungalZombie, IPatrolMob {
 
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
-    private static final EntityDimensions DEATH_DIMENSIONS = EntityDimensions.scalable(0.7f, 0.1f);
+    public static final EntityDataAccessor<Integer> STATE = SynchedEntityData.defineId(AbstractHumanoidFungalZombie.class, EntityDataSerializers.INT);
 
-    public static final EntityDataAccessor<Integer> STATE = SynchedEntityData.defineId(AbstractFungalZombie.class, EntityDataSerializers.INT);
 
-    public static final UUID SPAWN_MODIFIER = UUID.fromString("3606EAA0-0711-7B20-6FEA-1B6E1EFB535C");
+
 //    public static final UUID HEALTH_MODIFIER = UUID.fromString("6C53F861-5F06-B37C-3BBA-CE9A64139214");
 //    public static final UUID MOVEMENT_MODIFIER = UUID.fromString("9576CFEC-AE8C-7FF8-0612-52DA09D7632B");
 //    public static final UUID ARMOR_MODIFIER = UUID.fromString("5CDAC255-47E4-3E04-B51E-28F64AB10F0C");
@@ -68,23 +68,25 @@ public abstract class AbstractFungalZombie extends Zombie implements IFungalHaza
     private boolean patrolLeader;
     private boolean patrolling;
     private boolean hasLeader;
-    private AbstractFungalZombie leader;
+    private LivingEntity leader;
     private int animationTick;
     private final Map<FungalZombieState, StateHandler> stateHandlers = Maps.newHashMap();
 
     private FungalZombieState oldState;
 
 
-    public AbstractFungalZombie(EntityType<? extends Zombie> entityType, Level level) {
+    public AbstractHumanoidFungalZombie(EntityType<? extends Zombie> entityType, Level level) {
         super(entityType, level);
         registerStateRunner();
         SingletonGeoAnimatable.registerSyncedAnimatable(this);
     }
 
+    @Override
     public int getAnimationTick() {
         return animationTick;
     }
 
+    @Override
     public void setAnimationTick(int animationTick) {
         this.animationTick = animationTick;
     }
@@ -96,13 +98,15 @@ public abstract class AbstractFungalZombie extends Zombie implements IFungalHaza
 
     @Override
     protected PathNavigation createNavigation(Level level) {
-        return new FungalZombieGroundPathNavigation(this, level);
+        return new FungalZombieGroundPathNavigation<>(this, level);
     }
 
     @Override
     protected void registerGoals() {
         super.registerGoals();
-        this.goalSelector.addGoal(3, new FungalZombiePatrolGoal<>(this, 0.7D, 0.595D));
+        if (canJoinPatrol()) {
+            this.goalSelector.addGoal(3, new FungalZombiePatrolGoal<>(this, 0.7D, 0.595D));
+        }
     }
 
 
@@ -140,10 +144,10 @@ public abstract class AbstractFungalZombie extends Zombie implements IFungalHaza
 
     @Override
     protected void addBehaviourGoals() {
-        this.goalSelector.addGoal(3, new FungalZombieAttackGoal(this, 1.0D, false));
-        this.goalSelector.addGoal(6, new FungalZombieFloatGoal(this));
+        this.goalSelector.addGoal(3, new FungalZombieAttackGoal<>(this, 1.0D, false));
+        this.goalSelector.addGoal(6, new FungalZombieFloatGoal<>(this));
         this.goalSelector.addGoal(6, new MoveThroughVillageGoal(this, 1.0D, true, 4, this::canBreakDoors));
-        this.goalSelector.addGoal(7, new FungalZombieWaterAvoidingRandomStrollGoal(this, 1.0D));
+        this.goalSelector.addGoal(7, new FungalZombieWaterAvoidingRandomStrollGoal<>(this, 1.0D));
         this.targetSelector.addGoal(1, (new HurtByTargetGoal(this)).setAlertOthers(ZombifiedPiglin.class));
         this.targetSelector.addGoal(2, new FungalZombieNearestAttackableTargetGoal<>(this, Player.class, true, this::testAttackable));
         this.targetSelector.addGoal(3, new FungalZombieNearestAttackableTargetGoal<>(this, AbstractVillager.class, false, this::testAttackable));
@@ -151,39 +155,20 @@ public abstract class AbstractFungalZombie extends Zombie implements IFungalHaza
         this.targetSelector.addGoal(5, new FungalZombieNearestAttackableTargetGoal<>(this, Turtle.class, 10, true, false, livingEntity -> testAttackable(this) && Turtle.BABY_ON_LAND_SELECTOR.test(this)));
     }
 
-    public abstract double getAttackDamageModifier();
 
-    public abstract double getHealthModifier();
 
-    public abstract double getMovementModifier();
-
-    public abstract double getArmorModifier();
-
-    public abstract double getArmorToughnessModifier();
-
-    public abstract boolean testAttackable(LivingEntity livingEntity);
-
-    public abstract void registerStateRunner();
-
-    public abstract double getAttackRangeModifier();
-
-    public abstract int getAttackCoolDown();
-
+    @Override
     public double getAttackReachSqr(LivingEntity target) {
         return this.getBbWidth() * 2.0F * this.getBbWidth() * 2.0F * getAttackRangeModifier() + target.getBbWidth();
     }
 
-    public void putStateRunner(FungalZombieState state, StateHandler handler) {
-        stateHandlers.put(state, handler);
+
+    @Override
+    public @NotNull Map<FungalZombieState, StateHandler> getStateHandlers() {
+        return stateHandlers;
     }
 
-    public void runState() {
-        FungalZombieState state = getState();
-        StateHandler.StateRunner runner = stateHandlers.get(state).loopRunner();
-        if (runner != null) {
-            runner.run(state);
-        }
-    }
+
 
     @Override
     public void setXRot(float xRot) {
@@ -208,12 +193,12 @@ public abstract class AbstractFungalZombie extends Zombie implements IFungalHaza
         this.entityData.define(STATE, 0);
     }
 
+    @Override
     public void setState(FungalZombieState stateNew) {
-//        FungalZombieState stateOld = getState();
-//        switchState(stateOld, stateNew);
         this.entityData.set(STATE, stateNew.index());
     }
 
+    @Override
     public void setState(int stateIndex) {
         FungalZombieState stateNew = FungalZombieStates.FUNGAL_ZOMBIE_STATES.get(stateIndex);
         if (stateNew != null) {
@@ -223,19 +208,7 @@ public abstract class AbstractFungalZombie extends Zombie implements IFungalHaza
         }
     }
 
-    public void switchState(@Nullable FungalZombieState stateOld, @Nonnull FungalZombieState stateNew) {
-        if (!stateNew.equals(stateOld)) {
-            StateHandler handler = stateHandlers.get(stateOld);
-            if (handler != null) {
-                handler.endRunner().run(stateOld);
-            }
-            handler = stateHandlers.get(stateNew);
-            if (handler != null) {
-                handler.startRunner().run(stateNew);
-            }
-        }
-    }
-
+    @Override
     public FungalZombieState getState() {
         return FungalZombieStates.FUNGAL_ZOMBIE_STATES.get(this.entityData.get(STATE));
     }
@@ -248,7 +221,7 @@ public abstract class AbstractFungalZombie extends Zombie implements IFungalHaza
     @Override
     public void push(Entity entity) {
         if (isPatrolling()) {
-            if (isPatrolLeader() || (entity instanceof AbstractFungalZombie zombie && zombie.isPatrolLeader())) {
+            if (isPatrolLeader() || (entity instanceof IPatrolMob patrolMob && patrolMob.isPatrolLeader())) {
                 return;
             }
         }
@@ -289,21 +262,12 @@ public abstract class AbstractFungalZombie extends Zombie implements IFungalHaza
         super.setBaby(false);
     }
 
-    public abstract void attackAnimation();
-
-    public abstract int getAttackAnimeTick();
-
-    public abstract FungalZombieState defaultStates();
-
-    public static boolean checkFungalZombieSpawnRules(EntityType<? extends AbstractFungalZombie> entityType, ServerLevelAccessor level, MobSpawnType reason, BlockPos pos, RandomSource random) {
+    public static boolean checkFungalZombieSpawnRules(EntityType<? extends AbstractHumanoidFungalZombie> entityType, ServerLevelAccessor level, MobSpawnType reason, BlockPos pos, RandomSource random) {
 
         ServerLevel serverLevel = level.getLevel();
         if (serverLevel.getBiome(pos).is(FungalHazardTags.INFECTED_BLACKLIST)) {
             return false;
         }
-//        if (serverLevel.isRainingAt(pos)) {
-//            return true;
-//        }
         return Monster.checkMonsterSpawnRules(entityType, level, reason, pos, random);
     }
 
@@ -320,46 +284,43 @@ public abstract class AbstractFungalZombie extends Zombie implements IFungalHaza
         return super.getStepHeight();
     }
 
+    @Override
     public boolean isHasLeader() {
         return hasLeader;
     }
 
+    @Override
     public void setHasLeader(boolean hasLeader) {
         this.hasLeader = hasLeader;
     }
 
-    public AbstractFungalZombie getLeader() {
+    @Override
+    public LivingEntity getLeader() {
         return leader;
     }
 
-    public void setLeader(AbstractFungalZombie leader) {
+    @Override
+    public void setLeader(LivingEntity leader) {
         this.leader = leader;
     }
 
     @Override
     public void addAdditionalSaveData(CompoundTag compoundTag) {
         super.addAdditionalSaveData(compoundTag);
-        if (this.patrolTarget != null) {
-            compoundTag.put("PatrolTarget", NbtUtils.writeBlockPos(this.patrolTarget));
-        }
         compoundTag.putInt("PoseState", getState().index());
-        compoundTag.putBoolean("PatrolLeader", this.patrolLeader);
-        compoundTag.putBoolean("Patrolling", this.patrolling);
+        savePatrolInfo(compoundTag);
     }
 
     @Override
     public void readAdditionalSaveData(CompoundTag compoundTag) {
         super.readAdditionalSaveData(compoundTag);
-        if (compoundTag.contains("PatrolTarget")) {
-            this.patrolTarget = NbtUtils.readBlockPos(compoundTag.getCompound("PatrolTarget"));
-        }
         if (compoundTag.contains("PoseState")) {
             setState(compoundTag.getInt("PoseState"));
         }
-        this.patrolLeader = compoundTag.getBoolean("PatrolLeader");
-        this.patrolling = compoundTag.getBoolean("Patrolling");
+        readPatrolInfo(compoundTag);
     }
 
+    @Override
     public boolean canBeLeader() {
         return getState().canPatrol();
     }
@@ -369,42 +330,59 @@ public abstract class AbstractFungalZombie extends Zombie implements IFungalHaza
         return !this.patrolling || distanceSqr > 16384.0D;
     }
 
+    @Override
     public void setPatrolTarget(BlockPos patrolTarget) {
         this.patrolTarget = patrolTarget;
         this.patrolling = true;
     }
 
-    public BlockPos getPatrolTarget() {
+    @Override
+    public @Nullable BlockPos getPatrolTarget() {
         return this.patrolTarget;
     }
 
+    @Override
     public boolean hasPatrolTarget() {
         return this.patrolTarget != null;
     }
 
+    @Override
     public void setPatrolLeader(boolean patrolLeader) {
         this.patrolLeader = patrolLeader;
         this.patrolling = true;
     }
 
+    @Override
     public boolean isPatrolLeader() {
         return this.patrolLeader;
     }
 
+    @Override
     public boolean canJoinPatrol() {
-        FungalZombieState state = getState();
-        return CommonConfig.INFECTED_PATROLLING.get() && state.canPatrol() && level().getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, blockPosition()).getY() <= getEyeY() && (!level().isDay() || level().isRaining());
+        return true;
     }
 
+    @Override
+    public boolean canJoinPatrolNow() {
+        FungalZombieState state = getState();
+        Level level = level();
+        boolean flag = level.getBrightness(LightLayer.SKY, blockPosition()) > 10 || level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, blockPosition()).getY() <= getEyeY();
+        boolean flag2 = !level.isDay() || !isSunSensitive() || level.isRaining();
+        return CommonConfig.INFECTED_PATROLLING.get() && state.canPatrol() && flag2 && flag;
+    }
+
+    @Override
     public void findPatrolTarget() {
         this.patrolTarget = this.blockPosition().offset(-500 + this.random.nextInt(1000), 0, -500 + this.random.nextInt(1000));
         this.patrolling = true;
     }
 
+    @Override
     public boolean isPatrolling() {
         return this.patrolling;
     }
 
+    @Override
     public void setPatrolling(boolean patrolling) {
         this.patrolling = patrolling;
     }

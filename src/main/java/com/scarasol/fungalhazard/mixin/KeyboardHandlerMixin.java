@@ -1,6 +1,6 @@
 package com.scarasol.fungalhazard.mixin;
 
-import com.scarasol.fungalhazard.entity.AbstractFungalZombie;
+import com.scarasol.fungalhazard.api.IFungalZombie;
 import net.minecraft.client.KeyboardHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.player.Player;
@@ -22,7 +22,7 @@ public abstract class KeyboardHandlerMixin {
         if (modifiers == GLFW.GLFW_KEY_F3 || (key >= GLFW.GLFW_KEY_F1 && key <= GLFW.GLFW_KEY_F9) || (key >= GLFW.GLFW_KEY_0 && key <= GLFW.GLFW_KEY_9)) {
             return;
         }
-        if (action != 0 && key != GLFW.GLFW_KEY_ESCAPE && player != null && player.getVehicle() instanceof AbstractFungalZombie && minecraft.screen == null && !player.isCreative() && !player.isSpectator()) {
+        if (action != 0 && key != GLFW.GLFW_KEY_ESCAPE && player != null && player.getVehicle() instanceof IFungalZombie && minecraft.screen == null && !player.isCreative() && !player.isSpectator()) {
             ci.cancel();
         }
     }

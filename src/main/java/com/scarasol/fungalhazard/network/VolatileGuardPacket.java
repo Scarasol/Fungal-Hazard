@@ -1,6 +1,6 @@
 package com.scarasol.fungalhazard.network;
 
-import com.scarasol.fungalhazard.entity.VolatileEntity;
+import com.scarasol.fungalhazard.entity.humanoid.VolatileEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.Entity;

@@ -2,7 +2,7 @@ package com.scarasol.fungalhazard.client.renderer;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.scarasol.fungalhazard.entity.AbstractMutilatableZombie;
+import com.scarasol.fungalhazard.entity.humanoid.AbstractMutilatableZombie;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
@@ -12,7 +12,7 @@ import software.bernie.geckolib.model.GeoModel;
 /**
  * @author Scarasol
  */
-public class MutilatableZombieEntityRenderer <T extends AbstractMutilatableZombie> extends FungalZombieEntityRenderer<T>{
+public class MutilatableZombieEntityRenderer <T extends AbstractMutilatableZombie> extends HumanoidFungalZombieEntityRenderer<T> {
 
     public MutilatableZombieEntityRenderer(EntityRendererProvider.Context renderManager, boolean glow) {
         super(renderManager, glow);
